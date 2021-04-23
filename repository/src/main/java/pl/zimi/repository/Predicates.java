@@ -14,4 +14,8 @@ public class Predicates {
     public static DescriptivePredicate or(final DescriptivePredicate first, final DescriptivePredicate second) {
         return new ConjunctionDescriptivePredicate(ConjunctionDescriptivePredicate.OR, first, second);
     }
+
+    public static DescriptivePredicate lt(Descriptor descriptor, Object value) {
+        return new BasicDescriptivePredicate(descriptor, value, Operator.LOWER_THAN);
+    }
 }

@@ -1,5 +1,5 @@
 package pl.zimi.repository;
 
 public enum Operator {
-    EQUAL
+    EQUAL, LOWER_THAN;
 }

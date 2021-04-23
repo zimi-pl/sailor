@@ -8,6 +8,7 @@ public class Foo {
     private String abc;
     private String bar;
     private String test;
+    private Integer value;
 
     public String getAbc() {
         return abc;
@@ -21,6 +22,10 @@ public class Foo {
         return test;
     }
 
+    public Integer getValue() {
+        return value;
+    }
+
     public void setAbc(String abc) {
         this.abc = abc;
     }
@@ -31,5 +36,9 @@ public class Foo {
 
     public void setTest(String test) {
         this.test = test;
+    }
+
+    public void setValue(Integer value) {
+        this.value = value;
     }
 }

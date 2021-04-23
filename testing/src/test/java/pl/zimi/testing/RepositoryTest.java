@@ -195,6 +195,21 @@ public class RepositoryTest {
 
     @Test
     void lowerThan() {
-        Assertions.fail();
+
+        final Foo foo1 = new Foo();
+        foo1.setAbc("abc");
+        foo1.setValue(7);
+        repository.save(foo1);
+
+        final Foo foo2 = new Foo();
+        foo2.setAbc("abc");
+        foo2.setValue(10);
+        repository.save(foo2);
+
+        final DescriptivePredicate predicate = Predicates.lt(SFoo.foo.value, 10);
+        final List<Foo> foos = repository.find(predicate, null, null);
+
+        Assertions.assertEquals(1, foos.size());
+        Assertions.assertEquals("value LOWER_THAN 10", predicate.describe());
     }
 }
