@@ -41,9 +41,10 @@ class BasicDescriptivePredicate implements DescriptivePredicate {
                 return Objects.equals(computedValue, expectedValue);
             case LOWER_THAN:
                 return compare(computedValue, expectedValue) < 0;
+            case GREATER_THAN:
+                return compare(computedValue, expectedValue) > 0;
             default:
                 throw new IllegalArgumentException("Unknown operator " + operator);
-
         }
     }
 

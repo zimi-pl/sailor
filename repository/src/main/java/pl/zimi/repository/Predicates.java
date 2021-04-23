@@ -15,7 +15,11 @@ public class Predicates {
         return new ConjunctionDescriptivePredicate(ConjunctionDescriptivePredicate.OR, first, second);
     }
 
-    public static DescriptivePredicate lt(Descriptor descriptor, Object value) {
+    public static DescriptivePredicate lt(final Descriptor descriptor, final Object value) {
         return new BasicDescriptivePredicate(descriptor, value, Operator.LOWER_THAN);
+    }
+
+    public static DescriptivePredicate gt(final Descriptor descriptor, final Object value) {
+        return new BasicDescriptivePredicate(descriptor, value, Operator.GREATER_THAN);
     }
 }

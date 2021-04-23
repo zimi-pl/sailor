@@ -178,6 +178,23 @@ public class RepositoryTest {
         final List<Foo> foos = repository.find(predicate, null, null);
 
         Assertions.assertEquals(1, foos.size());
+        Assertions.assertEquals(foo1.getValue(), foos.get(0).getValue());
         Assertions.assertEquals("value LOWER_THAN 10", predicate.describe());
+    }
+
+    @Test
+    void greaterThan() {
+        final Foo foo1 = Foo.builder().abc("abc").value(7).build();
+        repository.save(foo1);
+
+        final Foo foo2 = Foo.builder().abc("abc").value(10).build();
+        repository.save(foo2);
+
+        final DescriptivePredicate predicate = Predicates.gt(SFoo.foo.value, 7);
+        final List<Foo> foos = repository.find(predicate, null, null);
+
+        Assertions.assertEquals(1, foos.size());
+        Assertions.assertEquals(foo2.getValue(), foos.get(0).getValue());
+        Assertions.assertEquals("value GREATER_THAN 7", predicate.describe());
     }
 }
