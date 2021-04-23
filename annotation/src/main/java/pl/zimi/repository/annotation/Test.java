@@ -46,7 +46,7 @@
 //
 //    public static void main(String[] args) {
 //        System.out.println(STest.test.foo.bar.str.getPath());
-//        System.out.println(SFoo.foo.bar.str.getPath());
+//        System.out.println(SFoo.foo.def.str.getPath());
 //        System.out.println(SBar.bar.str.getPath());
 //    }
 //}

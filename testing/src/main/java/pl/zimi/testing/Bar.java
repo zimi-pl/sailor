@@ -1,6 +1,6 @@
 package pl.zimi.testing;
 
-import ann.Queryable;
+import pl.zimi.repository.annotation.Queryable;
 
 @Queryable
 public class Bar {

@@ -1,8 +1,7 @@
-package proc;
+package pl.zimi.repository.proccessor;
 
 
-import ann.Descriptor;
-import ann.Queryable;
+import pl.zimi.repository.annotation.Queryable;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -19,7 +18,7 @@ import javax.lang.model.element.*;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
-@SupportedAnnotationTypes("ann.Queryable")
+@SupportedAnnotationTypes("pl.zimi.repository.annotation.Queryable")
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class QueryableProcessor extends AbstractProcessor {
 
@@ -43,12 +42,11 @@ public class QueryableProcessor extends AbstractProcessor {
                         createSourceFile(pack.getQualifiedName() + ".S" + clazz.getSimpleName());
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
                         "Creating " + f.toUri());
-                Writer w = f.openWriter();
-                try {
+                try (Writer w = f.openWriter()) {
                     PrintWriter pw = new PrintWriter(w);
                     pw.println("package " + pack.getQualifiedName() + ";");
 
-                    pw.println("import ann.Descriptor;");
+                    pw.println("import pl.zimi.repository.annotation.Descriptor;");
                     pw.println("public class S"
                             + clazz.getSimpleName() + " extends Descriptor {");
 
@@ -67,14 +65,12 @@ public class QueryableProcessor extends AbstractProcessor {
                                 String sa = s.substring(0, i) + ".S" + s.substring(i + 1);
                                 pw.println("    public " + sa + " " + field.getSimpleName() + " = new " + sa + "(this, \"" + field.getSimpleName() + "\");");
                             } else {
-                                pw.println("    public ann.Descriptor " + field.getSimpleName() + " = new ann.Descriptor(this, \"" + field.getSimpleName() + "\");");
+                                pw.println("    public Descriptor " + field.getSimpleName() + " = new Descriptor(this, \"" + field.getSimpleName() + "\");");
                             }
                         }
                     }
                     pw.println("}");
                     pw.flush();
-                } finally {
-                    w.close();
                 }
             } catch (IOException x) {
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,

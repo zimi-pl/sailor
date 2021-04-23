@@ -1,6 +1,6 @@
 package pl.zimi.repository;
 
-import ann.Descriptor;
+import pl.zimi.repository.annotation.Descriptor;
 
 import java.util.Comparator;
 

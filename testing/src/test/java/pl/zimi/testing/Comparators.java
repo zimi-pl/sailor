@@ -1,6 +1,6 @@
 package pl.zimi.testing;
 
-import ann.Descriptor;
+import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.DescriptiveComparator;
 import pl.zimi.repository.Direction;
 

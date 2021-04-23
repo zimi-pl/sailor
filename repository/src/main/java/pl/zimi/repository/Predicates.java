@@ -1,6 +1,6 @@
 package pl.zimi.repository;
 
-import ann.Descriptor;
+import pl.zimi.repository.annotation.Descriptor;
 
 public class Predicates {
     public static DescriptivePredicate eq(final Descriptor descriptor, final Object value) {

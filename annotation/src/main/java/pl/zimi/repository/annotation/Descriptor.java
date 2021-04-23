@@ -1,4 +1,4 @@
-package ann;
+package pl.zimi.repository.annotation;
 
 public class Descriptor {
 

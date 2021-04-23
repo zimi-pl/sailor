@@ -12,53 +12,53 @@ public class RepositoryTest {
 
     @Test
     void saveAndRead() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
         Assertions.assertEquals(1, repository.findAll().size());
-        Assertions.assertEquals("bar", repository.findAll().get(0).getBar());
+        Assertions.assertEquals("bar", repository.findAll().get(0).getDef());
     }
 
     @Test
     void independenceAfterSave() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        foo.setBar("foo");
+        foo.setDef("foo");
 
-        Assertions.assertEquals("bar", repository.findAll().get(0).getBar());
+        Assertions.assertEquals("bar", repository.findAll().get(0).getDef());
     }
 
     @Test
     void independenceAfterFind() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
         final Foo first = repository.findAll().get(0);
-        first.setBar("changed");
+        first.setDef("changed");
 
-        Assertions.assertEquals("bar", repository.findAll().get(0).getBar());
+        Assertions.assertEquals("bar", repository.findAll().get(0).getDef());
     }
 
     @Test
     void filter() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = Foo.builder().bar("other").build();
+        final Foo foo2 = Foo.builder().def("other").build();
         repository.save(foo2);
 
         Assertions.assertEquals(2, repository.findAll().size());
-        Assertions.assertEquals(1, repository.find(Predicates.eq(SFoo.foo.bar, "bar"), null, null).size());
+        Assertions.assertEquals(1, repository.find(Predicates.eq(SFoo.foo.def, "bar"), null, null).size());
 
     }
 
     @Test
     void noFilter() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = Foo.builder().bar("other").build();
+        final Foo foo2 = Foo.builder().def("other").build();
         repository.save(foo2);
 
         Assertions.assertEquals(2, repository.findAll().size());
@@ -68,100 +68,100 @@ public class RepositoryTest {
 
     @Test
     void sort() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = Foo.builder().bar("abc").build();
+        final Foo foo2 = Foo.builder().def("abc").build();
         repository.save(foo2);
 
-        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.bar), null);
+        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.def), null);
         Assertions.assertEquals(2, list.size());
-        Assertions.assertEquals("abc", list.get(0).getBar());
-        Assertions.assertEquals("bar", list.get(1).getBar());
+        Assertions.assertEquals("abc", list.get(0).getDef());
+        Assertions.assertEquals("bar", list.get(1).getDef());
 
     }
 
     @Test
     void sortReversed() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = Foo.builder().bar("abc").build();
+        final Foo foo2 = Foo.builder().def("abc").build();
         repository.save(foo2);
 
-        final List<Foo> list = repository.find(null, Comparators.desc(SFoo.foo.bar), null);
+        final List<Foo> list = repository.find(null, Comparators.desc(SFoo.foo.def), null);
         Assertions.assertEquals(2, list.size());
-        Assertions.assertEquals("bar", list.get(0).getBar());
-        Assertions.assertEquals("abc", list.get(1).getBar());
+        Assertions.assertEquals("bar", list.get(0).getDef());
+        Assertions.assertEquals("abc", list.get(1).getDef());
 
     }
 
     @Test
     void limit() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = Foo.builder().bar("abc").build();
+        final Foo foo2 = Foo.builder().def("abc").build();
         repository.save(foo2);
 
-        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.bar), new LimitOffset(1L, null));
+        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.def), new LimitOffset(1L, null));
         Assertions.assertEquals(1, list.size());
-        Assertions.assertEquals("abc", list.get(0).getBar());
+        Assertions.assertEquals("abc", list.get(0).getDef());
     }
 
     @Test
     void offset() {
-        final Foo foo = Foo.builder().bar("bar").build();
+        final Foo foo = Foo.builder().def("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = Foo.builder().bar("abc").build();
+        final Foo foo2 = Foo.builder().def("abc").build();
         repository.save(foo2);
 
-        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.bar), new LimitOffset(null, 1L));
+        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.def), new LimitOffset(null, 1L));
         Assertions.assertEquals(1, list.size());
-        Assertions.assertEquals("bar", list.get(0).getBar());
+        Assertions.assertEquals("bar", list.get(0).getDef());
     }
 
     @Test
     void andPredicate() {
-        final Foo foo1 = Foo.builder().bar("bar").abc("abc").build();
+        final Foo foo1 = Foo.builder().def("bar").abc("abc").build();
         repository.save(foo1);
 
-        final Foo foo2 = Foo.builder().bar("bar").abc("xyz").build();
+        final Foo foo2 = Foo.builder().def("bar").abc("xyz").build();
         repository.save(foo2);
 
-        final Foo foo3 = Foo.builder().bar("xyz").abc("abc").build();
+        final Foo foo3 = Foo.builder().def("xyz").abc("abc").build();
         repository.save(foo3);
 
-        final DescriptivePredicate predicate = Predicates.and(Predicates.eq(SFoo.foo.bar, "bar"), Predicates.eq(SFoo.foo.abc, "abc"));
+        final DescriptivePredicate predicate = Predicates.and(Predicates.eq(SFoo.foo.def, "bar"), Predicates.eq(SFoo.foo.abc, "abc"));
         final List<Foo> foos = repository.find(predicate, null, null);
 
         Assertions.assertEquals(1, foos.size());
-        Assertions.assertEquals("bar", foos.get(0).getBar());
+        Assertions.assertEquals("bar", foos.get(0).getDef());
         Assertions.assertEquals("abc", foos.get(0).getAbc());
-        Assertions.assertEquals("(bar EQUAL bar) AND (abc EQUAL abc)", predicate.describe());
+        Assertions.assertEquals("(def EQUAL bar) AND (abc EQUAL abc)", predicate.describe());
 
         Assertions.assertEquals(3, repository.find(null, null, null).size());
     }
 
     @Test
     void orPredicate() {
-        final Foo foo1 = Foo.builder().bar("bar1").abc("abc").build();
+        final Foo foo1 = Foo.builder().def("bar1").abc("abc").build();
         repository.save(foo1);
 
-        final Foo foo2 = Foo.builder().bar("bar2").abc("abc").build();
+        final Foo foo2 = Foo.builder().def("bar2").abc("abc").build();
         repository.save(foo2);
 
-        final Foo foo3 = Foo.builder().bar("bar3").abc("abc").build();
+        final Foo foo3 = Foo.builder().def("bar3").abc("abc").build();
         repository.save(foo3);
 
-        final DescriptivePredicate predicate = Predicates.or(Predicates.eq(SFoo.foo.bar, "bar1"), Predicates.eq(SFoo.foo.bar, "bar2"));
-        final List<Foo> foos = repository.find(predicate, Comparators.asc(SFoo.foo.bar), null);
+        final DescriptivePredicate predicate = Predicates.or(Predicates.eq(SFoo.foo.def, "bar1"), Predicates.eq(SFoo.foo.def, "bar2"));
+        final List<Foo> foos = repository.find(predicate, Comparators.asc(SFoo.foo.def), null);
 
         Assertions.assertEquals(2, foos.size());
-        Assertions.assertEquals("bar1", foos.get(0).getBar());
-        Assertions.assertEquals("bar2", foos.get(1).getBar());
-        Assertions.assertEquals("(bar EQUAL bar1) OR (bar EQUAL bar2)", predicate.describe());
+        Assertions.assertEquals("bar1", foos.get(0).getDef());
+        Assertions.assertEquals("bar2", foos.get(1).getDef());
+        Assertions.assertEquals("(def EQUAL bar1) OR (def EQUAL bar2)", predicate.describe());
 
         Assertions.assertEquals(3, repository.find(null, null, null).size());
     }

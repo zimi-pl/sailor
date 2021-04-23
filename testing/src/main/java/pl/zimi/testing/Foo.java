@@ -1,6 +1,6 @@
 package pl.zimi.testing;
 
-import ann.Queryable;
+import pl.zimi.repository.annotation.Queryable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class Foo {
 
     private String abc;
-    private String bar;
+    private String def;
     private String test;
     private Integer value;
 

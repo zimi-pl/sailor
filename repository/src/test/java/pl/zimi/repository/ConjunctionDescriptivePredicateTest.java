@@ -1,7 +1,6 @@
 package pl.zimi.repository;
 
-import ann.Descriptor;
-import org.junit.jupiter.api.Assertions;
+import pl.zimi.repository.annotation.Descriptor;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
