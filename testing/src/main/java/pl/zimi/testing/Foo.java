@@ -15,6 +15,7 @@ public class Foo {
 
     private String abc;
     private String def;
+    private Bar bar;
     private String test;
     private Integer value;
 

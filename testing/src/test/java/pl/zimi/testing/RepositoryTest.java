@@ -197,4 +197,19 @@ public class RepositoryTest {
         Assertions.assertEquals(foo2.getValue(), foos.get(0).getValue());
         Assertions.assertEquals("value GREATER_THAN 7", predicate.describe());
     }
+
+    @Test
+    void compoundObject() {
+        final Foo foo1 = Foo.builder()
+                .bar(Bar.builder().str("some text").build())
+                .value(7).build();
+        repository.save(foo1);
+
+        final DescriptivePredicate predicate = Predicates.eq(SFoo.foo.bar.str, "some text");
+        final var foos = repository.find(predicate, null, null);
+
+        Assertions.assertEquals(1, foos.size());
+        Assertions.assertEquals("bar.str EQUAL some text", predicate.describe());
+    }
+
 }
