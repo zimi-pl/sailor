@@ -10,8 +10,7 @@ public class PredicatesTest {
     void equal() {
         final DescriptivePredicate predicate = Predicates.eq(SFoo.foo.abc, "value");
 
-        final Foo abc = new Foo();
-        abc.setAbc("value");
+        final Foo abc = Foo.builder().abc("value").build();
         Assertions.assertTrue(predicate.test(abc));
 
         Assertions.assertEquals("abc EQUAL value", predicate.describe());
@@ -21,8 +20,7 @@ public class PredicatesTest {
     void equalWithNegativeResult() {
         final DescriptivePredicate predicate = Predicates.eq(SFoo.foo.abc, "value");
 
-        final Foo foo = new Foo();
-        foo.setAbc("other");
+        final Foo foo = Foo.builder().abc("other").build();
         Assertions.assertFalse(predicate.test(foo));
         Assertions.assertEquals("abc EQUAL value", predicate.describe());
     }

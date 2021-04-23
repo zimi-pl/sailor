@@ -12,8 +12,7 @@ public class RepositoryTest {
 
     @Test
     void saveAndRead() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
         Assertions.assertEquals(1, repository.findAll().size());
@@ -22,8 +21,7 @@ public class RepositoryTest {
 
     @Test
     void independenceAfterSave() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
         foo.setBar("foo");
@@ -33,8 +31,7 @@ public class RepositoryTest {
 
     @Test
     void independenceAfterFind() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
         final Foo first = repository.findAll().get(0);
@@ -45,12 +42,10 @@ public class RepositoryTest {
 
     @Test
     void filter() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("other");
+        final Foo foo2 = Foo.builder().bar("other").build();
         repository.save(foo2);
 
         Assertions.assertEquals(2, repository.findAll().size());
@@ -60,12 +55,10 @@ public class RepositoryTest {
 
     @Test
     void noFilter() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("other");
+        final Foo foo2 = Foo.builder().bar("other").build();
         repository.save(foo2);
 
         Assertions.assertEquals(2, repository.findAll().size());
@@ -75,12 +68,10 @@ public class RepositoryTest {
 
     @Test
     void sort() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("abc");
+        final Foo foo2 = Foo.builder().bar("abc").build();
         repository.save(foo2);
 
         final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.bar), null);
@@ -92,12 +83,10 @@ public class RepositoryTest {
 
     @Test
     void sortReversed() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("abc");
+        final Foo foo2 = Foo.builder().bar("abc").build();
         repository.save(foo2);
 
         final List<Foo> list = repository.find(null, Comparators.desc(SFoo.foo.bar), null);
@@ -109,12 +98,10 @@ public class RepositoryTest {
 
     @Test
     void limit() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("abc");
+        final Foo foo2 = Foo.builder().bar("abc").build();
         repository.save(foo2);
 
         final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.bar), new LimitOffset(1L, null));
@@ -124,12 +111,10 @@ public class RepositoryTest {
 
     @Test
     void offset() {
-        final Foo foo = new Foo();
-        foo.setBar("bar");
+        final Foo foo = Foo.builder().bar("bar").build();
         repository.save(foo);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("abc");
+        final Foo foo2 = Foo.builder().bar("abc").build();
         repository.save(foo2);
 
         final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.bar), new LimitOffset(null, 1L));
@@ -139,19 +124,13 @@ public class RepositoryTest {
 
     @Test
     void andPredicate() {
-        final Foo foo1 = new Foo();
-        foo1.setBar("bar");
-        foo1.setAbc("abc");
+        final Foo foo1 = Foo.builder().bar("bar").abc("abc").build();
         repository.save(foo1);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("bar");
-        foo2.setAbc("xyz");
+        final Foo foo2 = Foo.builder().bar("bar").abc("xyz").build();
         repository.save(foo2);
 
-        final Foo foo3 = new Foo();
-        foo3.setBar("xyz");
-        foo3.setAbc("abc");
+        final Foo foo3 = Foo.builder().bar("xyz").abc("abc").build();
         repository.save(foo3);
 
         final DescriptivePredicate predicate = Predicates.and(Predicates.eq(SFoo.foo.bar, "bar"), Predicates.eq(SFoo.foo.abc, "abc"));
@@ -167,19 +146,13 @@ public class RepositoryTest {
 
     @Test
     void orPredicate() {
-        final Foo foo1 = new Foo();
-        foo1.setBar("bar1");
-        foo1.setAbc("abc");
+        final Foo foo1 = Foo.builder().bar("bar1").abc("abc").build();
         repository.save(foo1);
 
-        final Foo foo2 = new Foo();
-        foo2.setBar("bar2");
-        foo2.setAbc("abc");
+        final Foo foo2 = Foo.builder().bar("bar2").abc("abc").build();
         repository.save(foo2);
 
-        final Foo foo3 = new Foo();
-        foo3.setBar("bar3");
-        foo3.setAbc("abc");
+        final Foo foo3 = Foo.builder().bar("bar3").abc("abc").build();
         repository.save(foo3);
 
         final DescriptivePredicate predicate = Predicates.or(Predicates.eq(SFoo.foo.bar, "bar1"), Predicates.eq(SFoo.foo.bar, "bar2"));
@@ -195,15 +168,10 @@ public class RepositoryTest {
 
     @Test
     void lowerThan() {
-
-        final Foo foo1 = new Foo();
-        foo1.setAbc("abc");
-        foo1.setValue(7);
+        final Foo foo1 = Foo.builder().abc("abc").value(7).build();
         repository.save(foo1);
 
-        final Foo foo2 = new Foo();
-        foo2.setAbc("abc");
-        foo2.setValue(10);
+        final Foo foo2 = Foo.builder().abc("abc").value(10).build();
         repository.save(foo2);
 
         final DescriptivePredicate predicate = Predicates.lt(SFoo.foo.value, 10);
