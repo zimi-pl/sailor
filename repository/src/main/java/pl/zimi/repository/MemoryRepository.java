@@ -1,10 +1,14 @@
 package pl.zimi.repository;
 
 import com.google.gson.Gson;
+import pl.zimi.repository.annotation.Descriptor;
+import pl.zimi.repository.contract.Contract;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,6 +17,15 @@ public class MemoryRepository<T> implements Repository<T> {
 
     private final Gson gson = new Gson();
     private final List<T> source = new ArrayList<>();
+    private final Contract<T> contract;
+    private final Map<Descriptor, AtomicInteger> counters = new HashMap<>();
+
+    public MemoryRepository(final Contract<T> contract) {
+        this.contract = contract;
+        for (final Descriptor descriptor : contract.getSequences()) {
+            counters.put(descriptor, new AtomicInteger(1));
+        }
+    }
 
     private T deepCopy(final T toCopy) {
         final Class<T> type = (Class<T>) toCopy.getClass();
@@ -22,6 +35,9 @@ public class MemoryRepository<T> implements Repository<T> {
     @Override
     public T save(T entity) {
         final T copied = deepCopy(entity);
+        for (final Map.Entry<Descriptor, AtomicInteger> entry : counters.entrySet()) {
+            Manipulator.set(copied, entry.getKey().getPath(), entry.getValue().getAndIncrement());
+        }
         source.add(copied);
         return copied;
     }

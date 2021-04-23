@@ -3,12 +3,14 @@ package pl.zimi.testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.zimi.repository.*;
+import pl.zimi.repository.contract.Contract;
+import pl.zimi.repository.contract.MemoryPort;
 
 import java.util.List;
 
 public class RepositoryTest {
 
-    final Repository<Foo> repository = RepositoryFactory.newInstance(Foo.class);
+    final Repository<Foo> repository = MemoryPort.port(Contract.repository(Foo.class));
 
     @Test
     void saveAndRead() {

@@ -16,4 +16,23 @@ class Manipulator {
             throw new RuntimeException(e);
         }
     }
+
+    public static <T> void set(final T source, final String path, final int value) {
+        Object parent = source;
+        Object child = source;
+        try {
+            final var parts = path.split("\\.");
+            for (int i = 0; i < parts.length; i++) {
+                final Field field = parent.getClass().getDeclaredField(parts[i]);
+                field.setAccessible(true);
+                if (parts.length - 1 != i) {
+                    child = field.get(parent);
+                } else {
+                    field.set(parent, value);
+                }
+            }
+        } catch (final NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
