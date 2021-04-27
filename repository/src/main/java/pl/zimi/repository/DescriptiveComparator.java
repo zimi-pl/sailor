@@ -23,13 +23,13 @@ public class DescriptiveComparator implements Comparator {
     }
 
     public String describe() {
-        return getPath() + " " + Direction.NATURAL;
+        return getPath() + " " + direction;
     }
 
     @Override
     public int compare(Object o1, Object o2) {
-        final Comparable v1 = (Comparable)Manipulator.get(o1, path.getPath());
-        final Comparable v2 = (Comparable)Manipulator.get(o2, path.getPath());
+        final Value v1 = Manipulator.get(o1, path.getPath());
+        final Value v2 = Manipulator.get(o2, path.getPath());
         return direction.getOrder() * Comparator.<Comparable>naturalOrder().compare(v1, v2);
     }
 }

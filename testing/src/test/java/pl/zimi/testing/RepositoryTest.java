@@ -249,4 +249,30 @@ public class RepositoryTest {
         Assertions.assertEquals("value GREATER_THAN 5", predicate.describe());
     }
 
+    @Test
+    void sortingAscendingWithNull() {
+        repository.save(Foo.builder().abc("siema").bar(Bar.builder().str("abc").build()).build());
+        repository.save(Foo.builder().abc("siema").bar(null).build());
+
+        final var comparator = new DescriptiveComparator(SFoo.foo.bar.str, Direction.NATURAL);
+        final var foos = repository.find(null, comparator, null);
+        Assertions.assertEquals(2, foos.size());
+        Assertions.assertEquals(null, foos.get(0).getBar());
+        Assertions.assertEquals("abc", foos.get(1).getBar().getStr());
+        Assertions.assertEquals("bar.str NATURAL", comparator.describe());
+    }
+
+    @Test
+    void sortingDescendingWithNull() {
+        repository.save(Foo.builder().abc("siema").bar(null).build());
+        repository.save(Foo.builder().abc("siema").bar(Bar.builder().str("abc").build()).build());
+
+        final var comparator = new DescriptiveComparator(SFoo.foo.bar.str, Direction.REVERSE);
+        final var foos = repository.find(null, comparator, null);
+        Assertions.assertEquals(2, foos.size());
+        Assertions.assertEquals("abc", foos.get(0).getBar().getStr());
+        Assertions.assertEquals(null, foos.get(1).getBar());
+        Assertions.assertEquals("bar.str REVERSE", comparator.describe());
+    }
+
 }
