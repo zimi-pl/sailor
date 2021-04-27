@@ -41,15 +41,23 @@ class BasicDescriptivePredicate implements DescriptivePredicate {
                 case EQUAL:
                     return Objects.equals(computedValue.getObject(), expectedValue);
                 case LOWER_THAN:
-                    return compare(computedValue.getObject(), expectedValue) < 0;
+                    return isLowerThan(computedValue.getObject());
                 case GREATER_THAN:
-                    return compare(computedValue.getObject(), expectedValue) > 0;
+                    return isGreaterThan(computedValue.getObject());
                 default:
                     throw new IllegalArgumentException("Unknown operator " + operator);
             }
         } else {
             return false;
         }
+    }
+
+    private boolean isGreaterThan(final Object computedValue) {
+        return computedValue != null && compare(computedValue, expectedValue) > 0;
+    }
+
+    private boolean isLowerThan(final Object computedValue) {
+        return computedValue != null && compare(computedValue, expectedValue) < 0;
     }
 
     private int compare(Object computedValue, Object expectedValue) {

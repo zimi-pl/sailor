@@ -227,4 +227,26 @@ public class RepositoryTest {
         Assertions.assertEquals("bar.str EQUAL some text", predicate.describe());
     }
 
+    @Test
+    void nullHandlingLowerThan() {
+        repository.save(Foo.builder().abc("siema").build());
+
+        final DescriptivePredicate predicate = Predicates.lt(SFoo.foo.value, 5);
+        final var foos = repository.find(predicate, null, null);
+
+        Assertions.assertEquals(0, foos.size());
+        Assertions.assertEquals("value LOWER_THAN 5", predicate.describe());
+    }
+
+    @Test
+    void nullHandlingGreaterThan() {
+        repository.save(Foo.builder().abc("siema").build());
+
+        final DescriptivePredicate predicate = Predicates.gt(SFoo.foo.value, 5);
+        final var foos = repository.find(predicate, null, null);
+
+        Assertions.assertEquals(0, foos.size());
+        Assertions.assertEquals("value GREATER_THAN 5", predicate.describe());
+    }
+
 }
