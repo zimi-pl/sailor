@@ -35,16 +35,20 @@ class BasicDescriptivePredicate implements DescriptivePredicate {
 
     @Override
     public boolean test(Object o) {
-        final Object computedValue = Manipulator.get(o, path.getPath());
-        switch (operator) {
-            case EQUAL:
-                return Objects.equals(computedValue, expectedValue);
-            case LOWER_THAN:
-                return compare(computedValue, expectedValue) < 0;
-            case GREATER_THAN:
-                return compare(computedValue, expectedValue) > 0;
-            default:
-                throw new IllegalArgumentException("Unknown operator " + operator);
+        final Value computedValue = Manipulator.get(o, path.getPath());
+        if (computedValue.getFailureReason() == null) {
+            switch (operator) {
+                case EQUAL:
+                    return Objects.equals(computedValue.getObject(), expectedValue);
+                case LOWER_THAN:
+                    return compare(computedValue.getObject(), expectedValue) < 0;
+                case GREATER_THAN:
+                    return compare(computedValue.getObject(), expectedValue) > 0;
+                default:
+                    throw new IllegalArgumentException("Unknown operator " + operator);
+            }
+        } else {
+            return false;
         }
     }
 

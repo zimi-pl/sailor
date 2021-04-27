@@ -214,4 +214,17 @@ public class RepositoryTest {
         Assertions.assertEquals("bar.str EQUAL some text", predicate.describe());
     }
 
+    @Test
+    void compoundObjectNullHandling() {
+        final Foo foo1 = Foo.builder()
+                .value(7).build();
+        repository.save(foo1);
+
+        final DescriptivePredicate predicate = Predicates.eq(SFoo.foo.bar.str, "some text");
+        final var foos = repository.find(predicate, null, null);
+
+        Assertions.assertEquals(0, foos.size());
+        Assertions.assertEquals("bar.str EQUAL some text", predicate.describe());
+    }
+
 }
