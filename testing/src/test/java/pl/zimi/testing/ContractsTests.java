@@ -3,31 +3,40 @@ package pl.zimi.testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.zimi.repository.Repository;
-import pl.zimi.repository.contract.Contract;
-import pl.zimi.repository.contract.MemoryPort;
+import pl.zimi.repository.contract.*;
+
+import java.util.function.Function;
 
 public class ContractsTests {
 
     @Test
-    void sequenceContract() {
+    void testSupersetContract() {
         final Contract<Foo> contract = Contract.repository(Foo.class)
-                .sequence(SFoo.foo.value);
+                .sequence(SFoo.foo.seq);
 
-        final Repository<Foo> repository = MemoryPort.port(contract);
-
-        final var saved = repository.save(Foo.builder().abc("abc").build());
-        Assertions.assertEquals(1, saved.getValue());
+        final var contractForPort = Contract.repository(Foo.class);
+        final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contractForPort);
+        final var ex = Assertions.assertThrows(RuntimeException.class, () -> {
+            ContractVerificator.assertThese(contract, differentSupplier);
+        });
     }
 
     @Test
-    void sequenceContractFollowing() {
-        final Contract<Foo> contract = Contract.repository(Foo.class)
-                .sequence(SFoo.foo.value);
+    void testSubsetContract() {
+        final Contract<Foo> contract = Contract.repository(Foo.class);
+        final var contractForPort = Contract.repository(Foo.class)
+                .sequence(SFoo.foo.seq);
 
-        final Repository<Foo> repository = MemoryPort.port(contract);
-        repository.save(Foo.builder().abc("abc").build());
-
-        final var another = repository.save(Foo.builder().abc("abc").build());
-        Assertions.assertEquals(2, another.getValue());
+        final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contractForPort);
+        ContractVerificator.assertThese(contract, differentSupplier);
     }
+
+    @Test
+    void testExactContract() {
+        final Contract<Foo> contract = Contract.repository(Foo.class);
+
+        final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contract);
+        ContractVerificator.assertThese(contract, differentSupplier);
+    }
+
 }

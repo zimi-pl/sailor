@@ -3,6 +3,8 @@ package pl.zimi.testing;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pl.zimi.repository.*;
+import pl.zimi.repository.contract.Foo;
+import pl.zimi.repository.contract.SFoo;
 
 public class PredicatesTest {
 

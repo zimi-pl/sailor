@@ -1,4 +1,4 @@
-package pl.zimi.testing;
+package pl.zimi.repository.contract;
 
 import lombok.Builder;
 import lombok.Data;

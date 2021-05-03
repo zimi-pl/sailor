@@ -1,10 +1,10 @@
-package pl.zimi.testing;
+package pl.zimi.repository.contract;
 
-import pl.zimi.repository.annotation.Queryable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.zimi.repository.annotation.Queryable;
 
 @Queryable
 @Data
@@ -18,5 +18,6 @@ public class Foo {
     private Bar bar;
     private String test;
     private Integer value;
+    private Integer seq;
 
 }
