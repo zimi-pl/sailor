@@ -1,5 +1,7 @@
 package pl.zimi.repository;
 
+import pl.zimi.repository.annotation.Descriptor;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
@@ -47,6 +49,19 @@ public class Manipulator {
         try {
             return source.getConstructor().newInstance();
         } catch (final NoSuchMethodException|IllegalAccessException|InstantiationException|InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> Class type(final Class<T> clazz, final String path) {
+        Class startClazz = clazz;
+        try {
+            for (final String part : path.split("\\.")) {
+                final Field field = startClazz.getDeclaredField(part);
+                startClazz = field.getType();
+            }
+            return startClazz;
+        } catch (final NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
     }

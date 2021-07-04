@@ -29,4 +29,8 @@ public class Descriptor {
     public int hashCode() {
         return Objects.hash(parent, path);
     }
+
+    public Descriptor getParent() {
+        return parent;
+    }
 }
