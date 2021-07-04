@@ -22,4 +22,8 @@ public class Predicates {
     public static DescriptivePredicate gt(final Descriptor descriptor, final Object value) {
         return new BasicDescriptivePredicate(descriptor, value, Operator.GREATER_THAN);
     }
+
+    public static DescriptivePredicate regex(final Descriptor descriptor, final String pattern) {
+        return new BasicDescriptivePredicate(descriptor, pattern, Operator.REGEX);
+    }
 }

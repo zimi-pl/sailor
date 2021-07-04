@@ -26,4 +26,8 @@ public class Contract<T> {
     public List<Descriptor> getSequences() {
         return sequences;
     }
+
+    Class<T> getEntityClass() {
+        return entityClass;
+    }
 }

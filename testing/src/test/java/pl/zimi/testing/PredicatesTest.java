@@ -28,6 +28,43 @@ public class PredicatesTest {
     }
 
     @Test
+    void regex() {
+        final DescriptivePredicate predicate = Predicates.regex(SFoo.foo.abc, "^[a-z]+$");
+
+        final Foo foo = Foo.builder().abc("other").build();
+        Assertions.assertTrue(predicate.test(foo));
+        Assertions.assertEquals("abc REGEX ^[a-z]+$", predicate.describe());
+    }
+
+
+    @Test
+    void regexContains() {
+        final DescriptivePredicate predicate = Predicates.regex(SFoo.foo.abc, "the");
+
+        final Foo foo = Foo.builder().abc("other").build();
+        Assertions.assertTrue(predicate.test(foo));
+        Assertions.assertEquals("abc REGEX the", predicate.describe());
+    }
+
+    @Test
+    void regexContainsFails() {
+        final DescriptivePredicate predicate = Predicates.regex(SFoo.foo.abc, "some");
+
+        final Foo foo = Foo.builder().abc("other").build();
+        Assertions.assertFalse(predicate.test(foo));
+        Assertions.assertEquals("abc REGEX some", predicate.describe());
+    }
+
+    @Test
+    void regexFailsForNull() {
+        final DescriptivePredicate predicate = Predicates.regex(SFoo.foo.abc, "some");
+
+        final Foo foo = Foo.builder().abc(null).build();
+        Assertions.assertFalse(predicate.test(foo));
+        Assertions.assertEquals("abc REGEX some", predicate.describe());
+    }
+
+    @Test
     void descriptiveComparator() {
         final DescriptiveComparator asc = Comparators.asc(SFoo.foo.abc);
         Assertions.assertEquals("abc", asc.getPath());

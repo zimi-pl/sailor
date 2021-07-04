@@ -3,6 +3,7 @@ package pl.zimi.repository;
 import pl.zimi.repository.annotation.Descriptor;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 class BasicDescriptivePredicate implements DescriptivePredicate {
 
@@ -44,6 +45,8 @@ class BasicDescriptivePredicate implements DescriptivePredicate {
                     return isLowerThan(computedValue.getObject());
                 case GREATER_THAN:
                     return isGreaterThan(computedValue.getObject());
+                case REGEX:
+                    return computedValue.getObject() != null && Pattern.compile((String)expectedValue).matcher((String)computedValue.getObject()).find();
                 default:
                     throw new IllegalArgumentException("Unknown operator " + operator);
             }

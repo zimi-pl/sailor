@@ -2,6 +2,7 @@ package pl.zimi.repository.contract;
 
 import pl.zimi.repository.Comparators;
 import pl.zimi.repository.*;
+import pl.zimi.repository.annotation.Descriptor;
 
 import java.util.*;
 import java.util.function.Function;
@@ -19,31 +20,35 @@ public class ContractVerificator {
         final var repository = supplier.apply(contract);
         final var sequenceRepository = supplier.apply(contract);
         final var list = Arrays.asList(
-                new Test("saveAndRead", () -> saveAndRead(contract, repository)),
-                new Test("independenceAfterSave", () -> independenceAfterSave(contract, repository)),
-                new Test("independenceAfterFind", () -> independenceAfterFind(contract, repository)),
-                new Test("filter", () -> filter(contract, repository)),
-                new Test("noFilter", () -> noFilter(contract, repository)),
-                new Test("sort", () -> sort(contract, repository)),
-                new Test("sortReversed", () -> sortReversed(contract, repository)),
-                new Test("limit", () -> limit(contract, repository)),
-                new Test("offset", () -> offset(contract, repository)),
-                new Test("andPredicate", () -> andPredicate(contract, repository)),
-                new Test("orPredicate", () -> orPredicate(contract, repository)),
-                new Test("lowerThan", () -> lowerThan(contract, repository)),
-                new Test("greaterThan", () -> greaterThan(contract, repository)),
-                new Test("compoundObject", () -> compoundObject(contract, repository)),
-                new Test("compoundObjectNullHandling", () -> compoundObjectNullHandling(contract, repository)),
-                new Test("nullHandlingLowerThan", () -> nullHandlingLowerThan(contract, repository)),
-                new Test("nullHandlingGreaterThan", () -> nullHandlingGreaterThan(contract, repository)),
-                new Test("sortingAscendingWithNull", () -> sortingAscendingWithNull(contract, repository)),
-                new Test("sortingDescendingWithNull", () -> sortingDescendingWithNull(contract, repository))
+                new Test("saveAndRead", () -> saveAndRead(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("independenceAfterSave", () -> independenceAfterSave(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("independenceAfterFind", () -> independenceAfterFind(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("noFilter", () -> noFilter(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("limit", () -> limit(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("offset", () -> offset(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("andPredicate", () -> andPredicate(repository, contract.getEntityClass(), SFoo.foo.def, SFoo.foo.abc)),
+                new Test("orPredicate", () -> orPredicate(repository, contract.getEntityClass(), SFoo.foo.def)),
+
+                new Test("filterStringEqual", () -> filterStringEqual(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("filterStringRegex", () -> filterStringRegex(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("sort", () -> sort(repository, contract.getEntityClass(), SFoo.foo.def)),
+                new Test("sortReversed", () -> sortReversed(repository, contract.getEntityClass(), SFoo.foo.def)),
+
+                new Test("lowerThan", () -> lowerThan(repository, contract.getEntityClass(), SFoo.foo.def, SFoo.foo.value)),
+                new Test("greaterThan", () -> greaterThan(repository, contract.getEntityClass(), SFoo.foo.def, SFoo.foo.value)),
+
+                new Test("compoundObject", () -> compoundObject(repository, contract.getEntityClass(), Bar.class, SFoo.foo.bar, SFoo.foo.bar.str)),
+                new Test("compoundObjectNullHandling", () -> compoundObjectNullHandling(repository, contract.getEntityClass(), SFoo.foo.def, SFoo.foo.bar.str)),
+                new Test("nullHandlingLowerThan", () -> nullHandlingLowerThan(repository, contract.getEntityClass(), SFoo.foo.def, SFoo.foo.value)),
+                new Test("nullHandlingGreaterThan", () -> nullHandlingGreaterThan(repository, contract.getEntityClass(), SFoo.foo.def, SFoo.foo.value)),
+                new Test("sortingAscendingWithNull", () -> sortingAscendingWithNull(repository, contract.getEntityClass(), Bar.class, SFoo.foo.bar, SFoo.foo.bar.str,SFoo.foo.def)),
+                new Test("sortingDescendingWithNull", () -> sortingDescendingWithNull(repository, contract.getEntityClass(), Bar.class, SFoo.foo.bar, SFoo.foo.bar.str,SFoo.foo.def))
         );
         final var tests = new ArrayList<>(list);
 
         if (!contract.getSequences().isEmpty()) {
-            tests.add(new Test("sequenceContract", () -> sequenceContract(contract, sequenceRepository)));
-            tests.add(new Test("sequenceContractFollowing", () -> sequenceContractFollowing(contract, repository)));
+            tests.add(new Test("sequenceContract", () -> sequenceContract(sequenceRepository, contract.getEntityClass(), SFoo.foo.seq)));
+            tests.add(new Test("sequenceContractFollowing", () -> sequenceContractFollowing(repository, contract.getEntityClass(), SFoo.foo.seq)));
         }
         Collections.shuffle(tests);
         return tests;
@@ -59,316 +64,387 @@ public class ContractVerificator {
         }
     }
 
-    static void saveAndRead(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void saveAndRead(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_saveAndRead";
-        final Foo foo = Foo.builder().def(first).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
+
+        //change type to other
         repository.save(foo);
 
         final var all = repository.findAll();
-        final var collect = all.stream().filter(f -> first.equals(f.getDef())).collect(Collectors.toList());
+        final var collect = all.stream().filter(f -> first.equals(Manipulator.get(f, descriptor.getPath()).getObject())).collect(Collectors.toList());
         assertEquals(1, collect.size());
-        assertEquals(first, collect.get(0).getDef());
+        assertEquals(first, Manipulator.get(collect.get(0), descriptor.getPath()).getObject());
     }
 
-    static void independenceAfterSave(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void independenceAfterSave(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_independenceAfterSave";
-        final Foo foo = Foo.builder().def(first).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
         repository.save(foo);
 
         final var second = "002_independenceAfterSave";
-        foo.setDef(second);
+        Manipulator.set(foo, descriptor.getPath(), second);
 
-        assertEquals(1, repository.find(Predicates.eq(SFoo.foo.def, first), null, null).size());
-        assertEquals(0, repository.find(Predicates.eq(SFoo.foo.def, second), null, null).size());
+        assertEquals(1, repository.find(Predicates.eq(descriptor, first), null, null).size());
+        assertEquals(0, repository.find(Predicates.eq(descriptor, second), null, null).size());
     }
 
-    static void independenceAfterFind(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void independenceAfterFind(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_independenceAfterFind";
-        final Foo foo = Foo.builder().def(first).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
         repository.save(foo);
 
-        final Foo fooFound = repository.find(Predicates.eq(SFoo.foo.def, first), null, null).get(0);
+        final T fooFound = repository.find(Predicates.eq(descriptor, first), null, null).get(0);
         final var second = "002_independenceAfterFind";
-        fooFound.setDef(second);
+        Manipulator.set(fooFound, descriptor.getPath(), second);
 
-        final var predicate = Predicates.or(Predicates.eq(SFoo.foo.def, first), Predicates.eq(SFoo.foo.def, second));
-        assertEquals(first, repository.find(predicate, null, null).get(0).getDef());
+        final var predicate = Predicates.or(Predicates.eq(descriptor, first), Predicates.eq(descriptor, second));
+        assertEquals(first, Manipulator.get(repository.find(predicate, null, null).get(0), descriptor.getPath()).getObject());
     }
 
-    static void filter(final Contract<Foo> contract, final Repository<Foo> repository) {
-        final var first = "001_filter";
-        final Foo foo = Foo.builder().def(first).build();
+    static <T> void filterStringEqual(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+        final var first = "001_filterStringEqual";
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
         repository.save(foo);
 
-        final var second = "002_filter";
-        final Foo foo2 = Foo.builder().def(second).build();
+        final var second = "002_filterStringEqual";
+        final var foo2 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo2, descriptor.getPath(), second);
         repository.save(foo2);
 
         assertEquals(2L, repository.findAll().stream()
-                .filter(f -> Arrays.asList(first, second).contains(f.getDef()))
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor.getPath()).getObject()))
                 .count());
-        assertEquals(1, repository.find(Predicates.eq(SFoo.foo.def, first), null, null).size());
-
+        assertEquals(1, repository.find(Predicates.eq(descriptor, first), null, null).size());
     }
 
-    static void noFilter(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void filterStringRegex(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+        final var first = "001_filterStringRegex";
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
+        repository.save(foo);
+
+        final var capitalS = Predicates.and(Predicates.eq(descriptor, first), Predicates.regex(descriptor, "S"));
+        assertEquals(1, repository.find(capitalS, null, null).size());
+
+        final var capitalB = Predicates.and(Predicates.eq(descriptor, first), Predicates.regex(descriptor, "B"));
+        assertEquals(0, repository.find(capitalB, null, null).size());
+
+        final var startsWith = Predicates.and(Predicates.eq(descriptor, first), Predicates.regex(descriptor, "^000"));
+        assertEquals(0, repository.find(startsWith, null, null).size());
+
+        final var startsWithCorrect = Predicates.and(Predicates.eq(descriptor, first), Predicates.regex(descriptor, "^001"));
+        assertEquals(1, repository.find(startsWithCorrect, null, null).size());
+    }
+
+    static <T> void noFilter(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_noFilter";
-        final Foo foo = Foo.builder().def(first).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
         repository.save(foo);
 
         final var second = "002_noFilter";
-        final Foo foo2 = Foo.builder().def(second).build();
+        final T foo2 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo2, descriptor.getPath(), second);
         repository.save(foo2);
 
         assertEquals(2L, repository.findAll().stream()
-                .filter(f -> Arrays.asList(first, second).contains(f.getDef()))
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor.getPath()).getObject()))
                 .count());
         assertEquals(2L, repository.find(null, null, null).stream()
-                .filter(f -> Arrays.asList(first, second).contains(f.getDef()))
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor.getPath()).getObject()))
                 .count());
 
     }
 
-    static void sort(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void sort(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "002_sort";
-        final Foo foo = Foo.builder().def(first).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
         repository.save(foo);
 
         final var second = "001_sort";
-        final Foo foo2 = Foo.builder().def(second).build();
+        final var foo2 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo2, descriptor.getPath(), second);
         repository.save(foo2);
 
-        final List<Foo> list = repository.find(null, Comparators.asc(SFoo.foo.def), null);
-        final var collected = list.stream().filter(f -> Arrays.asList(first, second).contains(f.getDef())).collect(Collectors.toList());
+        final List<T> list = repository.find(null, Comparators.asc(descriptor), null);
+        final var collected = list.stream().filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor.getPath()).getObject())).collect(Collectors.toList());
         assertEquals(2, collected.size());
-        assertEquals(second, collected.get(0).getDef());
-        assertEquals(first, collected.get(1).getDef());
+        assertEquals(second, Manipulator.get(collected.get(0), descriptor.getPath()).getObject());
+        assertEquals(first, Manipulator.get(collected.get(1), descriptor.getPath()).getObject());
 
     }
 
-    static void sortReversed(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void sortReversed(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "002_sortReversed";
-        final Foo foo = Foo.builder().def(first).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), first);
         repository.save(foo);
 
         final var second = "001_sortReversed";
-        final Foo foo2 = Foo.builder().def(second).build();
-        repository.save(foo2);
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, descriptor.getPath(), second);
+        repository.save(foo1);
 
-        final List<Foo> list = repository.find(null, Comparators.desc(SFoo.foo.def), null);
-        final var collected = list.stream().filter(f -> Arrays.asList(first, second).contains(f.getDef())).collect(Collectors.toList());
+        final List<T> list = repository.find(null, Comparators.desc(descriptor), null);
+        final var collected = list.stream().filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor.getPath()).getObject())).collect(Collectors.toList());
         assertEquals(2, collected.size());
-        assertEquals(first, collected.get(0).getDef());
-        assertEquals(second, collected.get(1).getDef());
+        assertEquals(first, Manipulator.get(collected.get(0), descriptor.getPath()).getObject());
+        assertEquals(second, Manipulator.get(collected.get(1), descriptor.getPath()).getObject());
 
     }
 
-    static void limit(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void limit(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var second = "002_limit";
-        final Foo foo = Foo.builder().def(second).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), second);
         repository.save(foo);
 
         final var first = "001_limit";
-        final Foo foo2 = Foo.builder().def(first).build();
-        repository.save(foo2);
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, descriptor.getPath(), first);
+        repository.save(foo1);
 
-        final var a = Predicates.eq(SFoo.foo.def, second);
-        final var b = Predicates.eq(SFoo.foo.def, first);
-        final List<Foo> list = repository.find(Predicates.or(a, b), Comparators.asc(SFoo.foo.def), new LimitOffset(1L, null));
+        final var a = Predicates.eq(descriptor, second);
+        final var b = Predicates.eq(descriptor, first);
+        final List<T> list = repository.find(Predicates.or(a, b), Comparators.asc(descriptor), new LimitOffset(1L, null));
         assertEquals(1, list.size());
-        assertEquals(first, list.get(0).getDef());
+        assertEquals(first, Manipulator.get(list.get(0), descriptor.getPath()).getObject());
     }
 
-    static void offset(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void offset(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var second = "002_offset";
-        final Foo foo = Foo.builder().def(second).build();
+        final var foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, descriptor.getPath(), second);
         repository.save(foo);
 
         final var first = "001_offset";
-        final Foo foo2 = Foo.builder().def(first).build();
-        repository.save(foo2);
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, descriptor.getPath(), first);
+        repository.save(foo1);
 
-        var predicate = Predicates.or(Predicates.eq(SFoo.foo.def, first), Predicates.eq(SFoo.foo.def, second));
-        final List<Foo> list = repository.find(predicate, Comparators.asc(SFoo.foo.def), new LimitOffset(null, 1L));
+        var predicate = Predicates.or(Predicates.eq(descriptor, first), Predicates.eq(descriptor, second));
+        final List<T> list = repository.find(predicate, Comparators.asc(descriptor), new LimitOffset(null, 1L));
         assertEquals(1, list.size());
-        assertEquals(second, list.get(0).getDef());
+        assertEquals(second, Manipulator.get(list.get(0), descriptor.getPath()).getObject());
     }
 
-    static void andPredicate(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void andPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor firstDescriptor, final Descriptor secondDescriptor) {
         final var andPredicatePart1 = "001_andPredicate";
         final var andPredicatePart2 = "002_andPredicate";
         final var other = "other_andPredicate";
 
-        final Foo foo1 = Foo.builder().def(andPredicatePart1).abc(andPredicatePart2).build();
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, firstDescriptor.getPath(), andPredicatePart1);
+        Manipulator.set(foo1, secondDescriptor.getPath(), andPredicatePart2);
         repository.save(foo1);
 
-        final Foo foo2 = Foo.builder().def(andPredicatePart1).abc(other).build();
+        final var foo2 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo2, firstDescriptor.getPath(), andPredicatePart1);
+        Manipulator.set(foo2, secondDescriptor.getPath(), other);
         repository.save(foo2);
 
-        final Foo foo3 = Foo.builder().def(other).abc(andPredicatePart2).build();
+        final var foo3 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo3, firstDescriptor.getPath(), other);
+        Manipulator.set(foo3, secondDescriptor.getPath(), andPredicatePart2);
         repository.save(foo3);
 
-        final DescriptivePredicate predicate = Predicates.and(Predicates.eq(SFoo.foo.def, andPredicatePart1), Predicates.eq(SFoo.foo.abc, andPredicatePart2));
-        final List<Foo> foos = repository.find(predicate, null, null);
+        final DescriptivePredicate predicate = Predicates.and(Predicates.eq(firstDescriptor, andPredicatePart1), Predicates.eq(secondDescriptor, andPredicatePart2));
+        final List<T> foos = repository.find(predicate, null, null);
 
         assertEquals(1, foos.size());
-        assertEquals(andPredicatePart1, foos.get(0).getDef());
-        assertEquals(andPredicatePart2, foos.get(0).getAbc());
+        assertEquals(andPredicatePart1, Manipulator.get(foos.get(0), firstDescriptor.getPath()).getObject());
+        assertEquals(andPredicatePart2, Manipulator.get(foos.get(0), secondDescriptor.getPath()).getObject());
         assertEquals("(def EQUAL 001_andPredicate) AND (abc EQUAL 002_andPredicate)", predicate.describe());
 
-        assertEquals(2, repository.find(Predicates.eq(SFoo.foo.def, andPredicatePart1), null, null).size());
-        assertEquals(2, repository.find(Predicates.eq(SFoo.foo.abc, andPredicatePart2), null, null).size());
+        assertEquals(2, repository.find(Predicates.eq(firstDescriptor, andPredicatePart1), null, null).size());
+        assertEquals(2, repository.find(Predicates.eq(secondDescriptor, andPredicatePart2), null, null).size());
     }
 
-    static void orPredicate(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void orPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_orPredicate";
-        final var orPredicate = "orPredicate";
-        final Foo foo1 = Foo.builder().def(first).abc(orPredicate).build();
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, descriptor.getPath(), first);
         repository.save(foo1);
 
         final var second = "002_orPredicate";
-        final Foo foo2 = Foo.builder().def(second).abc(orPredicate).build();
+        final var foo2 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo2, descriptor.getPath(), second);
         repository.save(foo2);
 
-        final var third = "003_orPredicate";
-        final Foo foo3 = Foo.builder().def(third).abc(orPredicate).build();
-        repository.save(foo3);
-
-        final DescriptivePredicate predicate = Predicates.or(Predicates.eq(SFoo.foo.def, first), Predicates.eq(SFoo.foo.def, second));
-        final List<Foo> foos = repository.find(predicate, Comparators.asc(SFoo.foo.def), null);
+        final DescriptivePredicate predicate = Predicates.or(Predicates.eq(descriptor, first), Predicates.eq(descriptor, second));
+        final List<T> foos = repository.find(predicate, Comparators.asc(descriptor), null);
 
         assertEquals(2, foos.size());
-        assertEquals(first, foos.get(0).getDef());
-        assertEquals(second, foos.get(1).getDef());
+        assertEquals(first, Manipulator.get(foos.get(0), descriptor.getPath()).getObject());
+        assertEquals(second, Manipulator.get(foos.get(1), descriptor.getPath()).getObject());
         assertEquals("(def EQUAL 001_orPredicate) OR (def EQUAL 002_orPredicate)", predicate.describe());
-
-        assertEquals(3, repository.find(Predicates.eq(SFoo.foo.abc, orPredicate), null, null).size());
     }
 
-    static void lowerThan(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void lowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final var lowerThan = "lowerThan";
-        final Foo foo1 = Foo.builder().abc(lowerThan).value(7).build();
-        repository.save(foo1);
+        final T foo3 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo3, distinctDescriptor.getPath(), lowerThan);
+        Manipulator.set(foo3, intDescriptor.getPath(), 7);
+        repository.save(foo3);
 
-        final Foo foo2 = Foo.builder().abc(lowerThan).value(10).build();
-        repository.save(foo2);
+        final T foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, distinctDescriptor.getPath(), lowerThan);
+        Manipulator.set(foo, intDescriptor.getPath(), 10);
+        repository.save(foo);
 
-        final DescriptivePredicate predicateLt = Predicates.lt(SFoo.foo.value, 10);
-        final var predicate = Predicates.and(Predicates.eq(SFoo.foo.abc, lowerThan), predicateLt);
-        final List<Foo> foos = repository.find(predicate, null, null);
+        final DescriptivePredicate predicateLt = Predicates.lt(intDescriptor, 10);
+        final var predicate = Predicates.and(Predicates.eq(distinctDescriptor, lowerThan), predicateLt);
+        final List<T> foos = repository.find(predicate, null, null);
 
         assertEquals(1, foos.size());
-        assertEquals(foo1.getValue(), foos.get(0).getValue());
+        assertEquals(Manipulator.get(foo3, intDescriptor.getPath()).getObject(), Manipulator.get(foos.get(0), intDescriptor.getPath()).getObject());
         assertEquals("value LOWER_THAN 10", predicateLt.describe());
     }
 
-    static void greaterThan(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void greaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final var greaterThan = "greaterThan";
-        final Foo foo1 = Foo.builder().abc(greaterThan).value(7).build();
+        Manipulator.set(Manipulator.noArgConstructor(clazz), distinctDescriptor.getPath(), greaterThan);
+        Manipulator.set(Manipulator.noArgConstructor(clazz), intDescriptor.getPath(), 7);
+        final var foo1 = Manipulator.noArgConstructor(clazz);
         repository.save(foo1);
 
-        final Foo foo2 = Foo.builder().abc(greaterThan).value(10).build();
-        repository.save(foo2);
+        final T foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, distinctDescriptor.getPath(), greaterThan);
+        Manipulator.set(foo, intDescriptor.getPath(), 10);
+        repository.save(foo);
 
-        final DescriptivePredicate predicateGt = Predicates.gt(SFoo.foo.value, 7);
-        final var predicate = Predicates.and(Predicates.eq(SFoo.foo.abc, greaterThan), Predicates.gt(SFoo.foo.value, 7));
+        final DescriptivePredicate predicateGt = Predicates.gt(intDescriptor, 7);
+        final var predicate = Predicates.and(Predicates.eq(distinctDescriptor, greaterThan), Predicates.gt(intDescriptor, 7));
 
-        final List<Foo> foos = repository.find(predicate, null, null);
+        final List<T> foos = repository.find(predicate, null, null);
 
         assertEquals(1, foos.size());
-        assertEquals(foo2.getValue(), foos.get(0).getValue());
+        assertEquals(Manipulator.get(foo, intDescriptor.getPath()).getObject(), Manipulator.get(foos.get(0), intDescriptor.getPath()).getObject());
         assertEquals("value GREATER_THAN 7", predicateGt.describe());
     }
 
-    static void compoundObject(final Contract<Foo> contract, final Repository<Foo> repository) {
+
+    static <T> void compoundObject(final Repository<T> repository, final Class<T> clazz, final Class internalClazz, final Descriptor internalDescriptor, final Descriptor compoundDescriptor) {
         final var compoundObject = "compoundObject";
-        final Foo foo1 = Foo.builder()
-                .bar(Bar.builder().str(compoundObject).build())
-                .value(7).build();
+        final T foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, internalDescriptor.getPath(), Manipulator.noArgConstructor(internalClazz));
+        Manipulator.set(foo1, compoundDescriptor.getPath(), compoundObject);
         repository.save(foo1);
 
-        final DescriptivePredicate predicate = Predicates.eq(SFoo.foo.bar.str, compoundObject);
+        final DescriptivePredicate predicate = Predicates.eq(compoundDescriptor, compoundObject);
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(1, foos.size());
         assertEquals("bar.str EQUAL compoundObject", predicate.describe());
     }
 
-    static void compoundObjectNullHandling(final Contract<Foo> contract, final Repository<Foo> repository) {
-        final Foo foo1 = Foo.builder()
-                .value(7).build();
+    static <T> void compoundObjectNullHandling(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor compoundDescriptor) {
+        final var compoundObjectNullHandling = "compoundObjectNullHandling";
+        final T foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, distinctDescriptor.getPath(), "compoundObjectNullHandling");
         repository.save(foo1);
 
-        final var compoundObjectNullHandling = "compoundObjectNullHandling";
-        final DescriptivePredicate predicate = Predicates.eq(SFoo.foo.bar.str, compoundObjectNullHandling);
+        final DescriptivePredicate predicate = Predicates.and(Predicates.eq(compoundDescriptor, compoundObjectNullHandling), Predicates.eq(distinctDescriptor, compoundObjectNullHandling));
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(0, foos.size());
-        assertEquals("bar.str EQUAL compoundObjectNullHandling", predicate.describe());
+        assertEquals("(bar.str EQUAL compoundObjectNullHandling) AND (def EQUAL compoundObjectNullHandling)", predicate.describe());
     }
 
-    static void nullHandlingLowerThan(final Contract<Foo> contract, final Repository<Foo> repository) {
-        repository.save(Foo.builder().abc("siema").build());
+    static <T> void nullHandlingLowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+        final T foo3 = Manipulator.noArgConstructor(clazz);
+        final var distinct = "nullHandlingLowerThan";
+        Manipulator.set(foo3, distinctDescriptor.getPath(), distinct);
+        repository.save(foo3);
 
-        final DescriptivePredicate predicate = Predicates.lt(SFoo.foo.value, 5);
+        final DescriptivePredicate predicate = Predicates.and(Predicates.lt(intDescriptor, 5), Predicates.eq(distinctDescriptor, distinct));
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(0, foos.size());
-        assertEquals("value LOWER_THAN 5", predicate.describe());
+        assertEquals("(value LOWER_THAN 5) AND (def EQUAL nullHandlingLowerThan)", predicate.describe());
     }
 
-    static void nullHandlingGreaterThan(final Contract<Foo> contract, final Repository<Foo> repository) {
-        final var nullHandlingGreaterThan = "nullHandlingGreaterThan";
-        repository.save(Foo.builder().abc(nullHandlingGreaterThan).build());
+    static <T> void nullHandlingGreaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+        final T foo3 = Manipulator.noArgConstructor(clazz);
+        final var distinct = "nullHandlingGreaterThan";
+        Manipulator.set(foo3, distinctDescriptor.getPath(), distinct);
+        repository.save(foo3);
 
-        final var predicateGt = Predicates.gt(SFoo.foo.value, 5);
-        final var predicate = Predicates.and(Predicates.eq(SFoo.foo.abc, nullHandlingGreaterThan), predicateGt);
+        final var predicateGt = Predicates.gt(intDescriptor, 5);
+        final var predicate = Predicates.and(Predicates.eq(distinctDescriptor, distinct), predicateGt);
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(0, foos.size());
-        assertEquals("value GREATER_THAN 5", predicateGt.describe());
+        assertEquals("(def EQUAL nullHandlingGreaterThan) AND (value GREATER_THAN 5)", predicate.describe());
     }
 
-    static void sortingAscendingWithNull(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void sortingAscendingWithNull(final Repository<T> repository, final Class<T> clazz, final Class internalClazz, final Descriptor internalDescriptor, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
         final var sortingAscendingWithNull = "sortingAscendingWithNull";
         final var first = "001_sortingAscendingWithNull";
-        repository.save(Foo.builder().abc(sortingAscendingWithNull).bar(Bar.builder().str(first).build()).build());
-        repository.save(Foo.builder().abc(sortingAscendingWithNull).bar(null).build());
 
-        final var comparator = new DescriptiveComparator(SFoo.foo.bar.str, Direction.NATURAL);
-        final var predicate = Predicates.eq(SFoo.foo.abc, sortingAscendingWithNull);
+        final var build1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(build1, distinctDescriptor.getPath(), sortingAscendingWithNull);
+        final var internal = Manipulator.noArgConstructor(internalClazz);
+        Manipulator.set(build1, internalDescriptor.getPath(), internal);
+        Manipulator.set(build1, compoundDescriptor.getPath(), first);
+        repository.save(build1);
+
+        final var build = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(build, distinctDescriptor.getPath(), sortingAscendingWithNull);
+        repository.save(build);
+
+        final var comparator = new DescriptiveComparator(compoundDescriptor, Direction.NATURAL);
+        final var predicate = Predicates.eq(distinctDescriptor, sortingAscendingWithNull);
         final var foos = repository.find(predicate, comparator, null);
         assertEquals(2, foos.size());
-        assertEquals(null, foos.get(0).getBar());
-        assertEquals(first, foos.get(1).getBar().getStr());
+        assertEquals(null, Manipulator.get(foos.get(0), internalDescriptor.getPath()).getObject());
+        assertEquals(first, Manipulator.get(foos.get(1), compoundDescriptor.getPath()).getObject());
         assertEquals("bar.str NATURAL", comparator.describe());
     }
 
-    static void sortingDescendingWithNull(final Contract<Foo> contract, final Repository<Foo> repository) {
+    static <T> void sortingDescendingWithNull(final Repository<T> repository, final Class<T> clazz, final Class internalClazz, final Descriptor internalDescriptor, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
         final var sortingDescendingWithNull = "sortingDescendingWithNull";
-        repository.save(Foo.builder().abc(sortingDescendingWithNull).bar(null).build());
-        final var first = "001_sortingDescendingWithNull";
-        repository.save(Foo.builder().abc(sortingDescendingWithNull).bar(Bar.builder().str(first).build()).build());
+        final var build = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(build, distinctDescriptor.getPath(), sortingDescendingWithNull);
+        repository.save(build);
 
-        final var comparator = new DescriptiveComparator(SFoo.foo.bar.str, Direction.REVERSE);
-        final var predicate = Predicates.eq(SFoo.foo.abc, sortingDescendingWithNull);
+        final var first = "001_sortingDescendingWithNull";
+        final var build1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(build1, distinctDescriptor.getPath(), sortingDescendingWithNull);
+        final var internal = Manipulator.noArgConstructor(internalClazz);
+        Manipulator.set(build1, internalDescriptor.getPath(), internal);
+        Manipulator.set(build1, compoundDescriptor.getPath(), first);
+        repository.save(build1);
+
+        final var comparator = new DescriptiveComparator(compoundDescriptor, Direction.REVERSE);
+        final var predicate = Predicates.eq(distinctDescriptor, sortingDescendingWithNull);
         final var foos = repository.find(predicate, comparator, null);
         assertEquals(2, foos.size());
-        assertEquals(first, foos.get(0).getBar().getStr());
-        assertEquals(null, foos.get(1).getBar());
+        assertEquals(first, Manipulator.get(foos.get(0), compoundDescriptor.getPath()).getObject());
+        assertEquals(null, Manipulator.get(foos.get(1), internalDescriptor.getPath()).getObject());
         assertEquals("bar.str REVERSE", comparator.describe());
     }
 
-    static void sequenceContract(final Contract<Foo> contract, final Repository<Foo> repository) {
-        final var saved = repository.save(Foo.builder().abc("abc").build());
-        assertEquals(1, saved.getSeq());
+    static <T> void sequenceContract(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorSeq) {
+        final var saved = repository.save(Manipulator.noArgConstructor(clazz));
+        assertEquals(1, Manipulator.get(saved, descriptorSeq.getPath()).getObject());
     }
 
-    static void sequenceContractFollowing(final Contract<Foo> contract, final Repository<Foo> repository) {
-        final var first = repository.save(Foo.builder().abc("abc").build());
+    static <T> void sequenceContractFollowing(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorSeq) {
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final var first = repository.save(foo1);
 
-        final var another = repository.save(Foo.builder().abc("abc").build());
-        assertTrue(first.getSeq() < another.getSeq());
+        final var foo2 = Manipulator.noArgConstructor(clazz);
+        final var second = repository.save(foo2);
+        final var firstSeq = (Comparable)Manipulator.get(first, descriptorSeq.getPath()).getObject();
+        final var secondSeq = (Comparable)Manipulator.get(second, descriptorSeq.getPath()).getObject();
+        assertTrue(Comparator.<Comparable>naturalOrder().compare(firstSeq, secondSeq) < 0);
     }
 
     private static void assertTrue(final boolean test) {

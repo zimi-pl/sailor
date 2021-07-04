@@ -1,11 +1,11 @@
 package pl.zimi.repository;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 
-class Manipulator {
+public class Manipulator {
 
-
-    static Value get(final Object source, final String path) {
+    public static Value get(final Object source, final String path) {
         Object deeperSource = source;
         try {
             for (final String part : path.split("\\.")) {
@@ -14,7 +14,7 @@ class Manipulator {
                     field.setAccessible(true);
                     deeperSource = field.get(deeperSource);
                 } else {
-                    Value.failure("problem with " + part);
+                    return Value.failure("problem with " + part);
                 }
             }
             return Value.value(deeperSource);
@@ -23,7 +23,7 @@ class Manipulator {
         }
     }
 
-    public static <T> void set(final T source, final String path, final int value) {
+    public static <T> void set(final T source, final String path, final Object value) {
         Object parent = source;
         Object child = source;
         try {
@@ -36,8 +36,17 @@ class Manipulator {
                 } else {
                     field.set(parent, value);
                 }
+                parent = child;
             }
         } catch (final NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <T> T noArgConstructor(final Class<T> source) {
+        try {
+            return source.getConstructor().newInstance();
+        } catch (final NoSuchMethodException|IllegalAccessException|InstantiationException|InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
