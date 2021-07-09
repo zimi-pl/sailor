@@ -1,4 +1,4 @@
-package pl.zimi.testing;
+package pl.zimi.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
