@@ -50,12 +50,13 @@ public class QueryableProcessor extends AbstractProcessor {
                     pw.println("package " + pack.getQualifiedName() + ";");
 
                     pw.println("import pl.zimi.repository.annotation.Descriptor;");
+                    pw.println("import pl.zimi.repository.annotation.TypedDescriptor;");
                     pw.println("public class S"
-                            + clazz.getSimpleName() + " extends Descriptor {");
+                            + clazz.getSimpleName() + " extends TypedDescriptor<" + clazz.getSimpleName() + "> {");
 
                     pw.println("");
                     pw.println("    public S" + clazz.getSimpleName() + "(Descriptor parent, String path) {");
-                    pw.println("        super(parent, path);");
+                    pw.println("        super(parent, path, " + clazz.getSimpleName() + ".class);");
                     pw.println("    }");
                     pw.println("    public static S" + clazz.getSimpleName() + " " + decapitalize(clazz.getSimpleName() + " = new S" + clazz.getSimpleName() + "(null, \"\");"));
 
@@ -68,7 +69,7 @@ public class QueryableProcessor extends AbstractProcessor {
                                 String sa = s.substring(0, i) + ".S" + s.substring(i + 1);
                                 pw.println("    public " + sa + " " + field.getSimpleName() + " = new " + sa + "(this, \"" + field.getSimpleName() + "\");");
                             } else {
-                                pw.println("    public Descriptor " + field.getSimpleName() + " = new Descriptor(this, \"" + field.getSimpleName() + "\");");
+                                pw.println("    public TypedDescriptor<" + s + "> " + field.getSimpleName() + " = new TypedDescriptor(this, \"" + field.getSimpleName() + "\", " + s + ".class);");
                             }
                         }
                     }

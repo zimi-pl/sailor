@@ -1,6 +1,7 @@
 package pl.zimi.repository;
 
 import pl.zimi.repository.annotation.Descriptor;
+import pl.zimi.repository.annotation.TypedDescriptor;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -64,5 +65,10 @@ public class Manipulator {
         } catch (final NoSuchFieldException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static <T> TypedValue<T> getValue(final Object source, TypedDescriptor<T> descriptor) {
+        final var value = get(source, descriptor);
+        return new TypedValue<>((T)value.getObject(), value.getFailureReason());
     }
 }

@@ -3,6 +3,7 @@ package pl.zimi.repository.contract;
 import pl.zimi.repository.Comparators;
 import pl.zimi.repository.*;
 import pl.zimi.repository.annotation.Descriptor;
+import pl.zimi.repository.annotation.TypedDescriptor;
 
 import java.util.*;
 import java.util.function.Function;
@@ -73,7 +74,7 @@ public class ContractVerificator {
         }
     }
 
-    public static <T> void saveAndRead(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void saveAndRead(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
         final var first = "001_saveAndRead";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
@@ -87,7 +88,7 @@ public class ContractVerificator {
         assertEquals(first, Manipulator.get(collect.get(0), descriptor).getObject());
     }
 
-    public static <T> void independenceAfterSave(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void independenceAfterSave(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
         final var first = "001_independenceAfterSave";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
@@ -114,7 +115,7 @@ public class ContractVerificator {
         assertEquals(first, Manipulator.get(repository.find(predicate, null, null).get(0), descriptor).getObject());
     }
 
-    public static <T> void filterStringEqual(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void filterStringEqual(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
         final var first = "001_filterStringEqual";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
@@ -126,7 +127,7 @@ public class ContractVerificator {
         repository.save(foo2);
 
         assertEquals(2L, repository.findAll().stream()
-                .map(f -> Manipulator.get(f, descriptor).getObject())
+                .map(f -> Manipulator.getValue(f, descriptor).getValue())
                 .filter(f -> Arrays.asList(first, second).contains(f))
                 .count());
         assertEquals(1, repository.find(Predicates.eq(descriptor, first), null, null).size());
@@ -151,7 +152,7 @@ public class ContractVerificator {
         assertEquals(1, repository.find(startsWithCorrect, null, null).size());
     }
 
-    public static <T> void noFilter(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void noFilter(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
         final var first = "001_noFilter";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
@@ -163,15 +164,15 @@ public class ContractVerificator {
         repository.save(foo2);
 
         assertEquals(2L, repository.findAll().stream()
-                .filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor).getObject()))
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
                 .count());
         assertEquals(2L, repository.find(null, null, null).stream()
-                .filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor).getObject()))
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
                 .count());
 
     }
 
-    public static <T> void sort(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void sort(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
         final var first = "002_sort";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
@@ -183,14 +184,16 @@ public class ContractVerificator {
         repository.save(foo2);
 
         final List<T> list = repository.find(null, Comparators.asc(descriptor), null);
-        final var collected = list.stream().filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor).getObject())).collect(Collectors.toList());
+        final var collected = list.stream()
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
+                .collect(Collectors.toList());
         assertEquals(2, collected.size());
         assertEquals(second, Manipulator.get(collected.get(0), descriptor).getObject());
         assertEquals(first, Manipulator.get(collected.get(1), descriptor).getObject());
 
     }
 
-    public static <T> void sortReversed(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void sortReversed(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
         final var first = "002_sortReversed";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
@@ -202,7 +205,9 @@ public class ContractVerificator {
         repository.save(foo1);
 
         final List<T> list = repository.find(null, Comparators.desc(descriptor), null);
-        final var collected = list.stream().filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor).getObject())).collect(Collectors.toList());
+        final var collected = list.stream()
+                .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
+                .collect(Collectors.toList());
         assertEquals(2, collected.size());
         assertEquals(first, Manipulator.get(collected.get(0), descriptor).getObject());
         assertEquals(second, Manipulator.get(collected.get(1), descriptor).getObject());

@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group 'org.example'
@@ -7,6 +8,7 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -16,4 +18,17 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'org.example'
+            artifactId 'annotation'
+            version '1.0-SNAPSHOT'
+
+            from components.java
+        }
+    }
 }
