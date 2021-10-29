@@ -32,19 +32,19 @@ public class MemoryRepository<T> implements Repository<T> {
     @Override
     public T save(T entity) {
         final T copied = deepCopy(entity);
-        if (contract.getId() != null && Manipulator.get(copied, contract.getId().getPath()).getObject() == null) {
-            Manipulator.set(copied, contract.getId().getPath(), Integer.toString(idCounter.getAndIncrement()));
+        if (contract.getId() != null && Manipulator.get(copied, contract.getId()).getObject() == null) {
+            Manipulator.set(copied, contract.getId(), Integer.toString(idCounter.getAndIncrement()));
             if (versionDescriptor != null) {
-                Manipulator.set(copied, versionDescriptor.getPath(), 0);
+                Manipulator.set(copied, versionDescriptor, 0);
             }
         } else if (contract.getId() != null && versionDescriptor != null) {
-            final var previousVersion = Manipulator.get(entity, versionDescriptor.getPath()).getObject();
-            final var id = Manipulator.get(entity, contract.getId().getPath()).getObject();
+            final var previousVersion = Manipulator.get(entity, versionDescriptor).getObject();
+            final var id = Manipulator.get(entity, contract.getId()).getObject();
             final var currentEntity = source.get(id);
             if (currentEntity != null) {
-                final var dbVersion = Manipulator.get(currentEntity, versionDescriptor.getPath()).getObject();
+                final var dbVersion = Manipulator.get(currentEntity, versionDescriptor).getObject();
                 if (Objects.equals(previousVersion, dbVersion)) {
-                    Manipulator.set(copied, versionDescriptor.getPath(), ((Integer) previousVersion) + 1);
+                    Manipulator.set(copied, versionDescriptor, ((Integer) previousVersion) + 1);
                 } else {
                     throw new OptimisticLockException("Given version: " + previousVersion + ", db version: " + dbVersion);
                 }
@@ -52,7 +52,7 @@ public class MemoryRepository<T> implements Repository<T> {
                 throw new OptimisticLockException("Given version: " + previousVersion + ", db version: null");
             }
         }
-        final var id = contract.getId() != null ? Manipulator.get(copied, contract.getId().getPath()).getObject() : UUID.randomUUID().toString();
+        final var id = contract.getId() != null ? Manipulator.get(copied, contract.getId()).getObject() : UUID.randomUUID().toString();
         source.put(id, copied);
         return deepCopy(copied);
     }

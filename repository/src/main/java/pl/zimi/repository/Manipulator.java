@@ -7,10 +7,10 @@ import java.lang.reflect.InvocationTargetException;
 
 public class Manipulator {
 
-    public static Value get(final Object source, final String path) {
+    public static Value get(final Object source, final Descriptor descriptor) {
         Object deeperSource = source;
         try {
-            for (final String part : path.split("\\.")) {
+            for (final String part : descriptor.getPath().split("\\.")) {
                 if (deeperSource != null) {
                     final Field field = deeperSource.getClass().getDeclaredField(part);
                     field.setAccessible(true);
@@ -25,11 +25,11 @@ public class Manipulator {
         }
     }
 
-    public static <T> void set(final T source, final String path, final Object value) {
+    public static <T> void set(final T source, final Descriptor descriptor, final Object value) {
         Object parent = source;
         Object child = source;
         try {
-            final var parts = path.split("\\.");
+            final var parts = descriptor.getPath().split("\\.");
             for (int i = 0; i < parts.length; i++) {
                 final Field field = parent.getClass().getDeclaredField(parts[i]);
                 field.setAccessible(true);
@@ -53,10 +53,10 @@ public class Manipulator {
         }
     }
 
-    public static <T> Class type(final Class<T> clazz, final String path) {
+    public static <T> Class type(final Class<T> clazz, final Descriptor descriptor) {
         Class startClazz = clazz;
         try {
-            for (final String part : path.split("\\.")) {
+            for (final String part : descriptor.getPath().split("\\.")) {
                 final Field field = startClazz.getDeclaredField(part);
                 startClazz = field.getType();
             }

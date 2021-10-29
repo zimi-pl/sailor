@@ -27,8 +27,8 @@ public class Sort {
     }
 
     public int compare(Object o1, Object o2) {
-        final Value v1 = Manipulator.get(o1, path.getPath());
-        final Value v2 = Manipulator.get(o2, path.getPath());
+        final Value v1 = Manipulator.get(o1, path);
+        final Value v2 = Manipulator.get(o2, path);
         return direction.getOrder() * Comparator.<Comparable>naturalOrder().compare(v1, v2);
     }
 }

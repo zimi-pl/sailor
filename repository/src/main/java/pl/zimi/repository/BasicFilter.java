@@ -36,7 +36,7 @@ class BasicFilter implements Filter {
 
     @Override
     public boolean test(Object o) {
-        final Value computedValue = Manipulator.get(o, path.getPath());
+        final Value computedValue = Manipulator.get(o, path);
         if (computedValue.getFailureReason() == null) {
             switch (operator) {
                 case EQUAL:
