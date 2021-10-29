@@ -2,16 +2,16 @@ package pl.zimi.repository;
 
 import java.util.List;
 
-public class ConjunctionDescriptivePredicate implements DescriptivePredicate {
+public class ConjunctionFilter implements Filter {
 
     static final String AND = "AND";
     static final String OR = "OR";
 
     private final String operator;
-    private final DescriptivePredicate first;
-    private final DescriptivePredicate second;
+    private final Filter first;
+    private final Filter second;
 
-    ConjunctionDescriptivePredicate(final String operator, final DescriptivePredicate first, final DescriptivePredicate second) {
+    ConjunctionFilter(final String operator, final Filter first, final Filter second) {
         this.operator = operator;
         assertOperator();
         this.first = first;

@@ -49,9 +49,15 @@ public class ContractVerificator {
         );
         final var tests = new ArrayList<>(list);
 
-        for (final Descriptor seq : contract.getSequences()) {
-            tests.add(new Test("sequenceContract for " + seq.getPath(), () -> sequenceContract(supplier.apply(contract), contract.getEntityClass(), seq)));
-            tests.add(new Test("sequenceContractFollowing for " + seq.getPath(), () -> sequenceContractFollowing(repository, contract.getEntityClass(), seq)));
+        if (contract.getId() != null) {
+            tests.add(new Test("idStringContract", () -> idStringContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
+            tests.add(new Test("idStringContractNextValue", () -> idStringContractNextValue(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
+        }
+
+        if (contract.getVersion() != null) {
+            tests.add(new Test("versionContract", () -> versionContract(supplier.apply(contract), contract.getEntityClass(), contract.getVersion())));
+            tests.add(new Test("versionContractNextValue", () -> versionContractNextValue(supplier.apply(contract), contract.getEntityClass(), contract.getVersion())));
+            tests.add(new Test("versionContractOptimisticLock", () -> versionContractOptimisticLock(supplier.apply(contract), contract.getEntityClass(), contract.getId(), contract.getVersion())));
         }
         Collections.shuffle(tests);
         return tests;
@@ -67,7 +73,7 @@ public class ContractVerificator {
         }
     }
 
-    static <T> void saveAndRead(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void saveAndRead(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_saveAndRead";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -81,7 +87,7 @@ public class ContractVerificator {
         assertEquals(first, Manipulator.get(collect.get(0), descriptor.getPath()).getObject());
     }
 
-    static <T> void independenceAfterSave(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void independenceAfterSave(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_independenceAfterSave";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -94,7 +100,7 @@ public class ContractVerificator {
         assertEquals(0, repository.find(Predicates.eq(descriptor, second), null, null).size());
     }
 
-    static <T> void independenceAfterFind(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void independenceAfterFind(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_independenceAfterFind";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -108,7 +114,7 @@ public class ContractVerificator {
         assertEquals(first, Manipulator.get(repository.find(predicate, null, null).get(0), descriptor.getPath()).getObject());
     }
 
-    static <T> void filterStringEqual(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void filterStringEqual(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_filterStringEqual";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -120,12 +126,13 @@ public class ContractVerificator {
         repository.save(foo2);
 
         assertEquals(2L, repository.findAll().stream()
-                .filter(f -> Arrays.asList(first, second).contains(Manipulator.get(f, descriptor.getPath()).getObject()))
+                .map(f -> Manipulator.get(f, descriptor.getPath()).getObject())
+                .filter(f -> Arrays.asList(first, second).contains(f))
                 .count());
         assertEquals(1, repository.find(Predicates.eq(descriptor, first), null, null).size());
     }
 
-    static <T> void filterStringRegex(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void filterStringRegex(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_filterStringRegex";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -144,7 +151,7 @@ public class ContractVerificator {
         assertEquals(1, repository.find(startsWithCorrect, null, null).size());
     }
 
-    static <T> void noFilter(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void noFilter(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_noFilter";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -164,7 +171,7 @@ public class ContractVerificator {
 
     }
 
-    static <T> void sort(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void sort(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "002_sort";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -183,7 +190,7 @@ public class ContractVerificator {
 
     }
 
-    static <T> void sortReversed(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void sortReversed(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "002_sortReversed";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), first);
@@ -202,7 +209,7 @@ public class ContractVerificator {
 
     }
 
-    static <T> void limit(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void limit(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var second = "002_limit";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), second);
@@ -220,7 +227,7 @@ public class ContractVerificator {
         assertEquals(first, Manipulator.get(list.get(0), descriptor.getPath()).getObject());
     }
 
-    static <T> void offset(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void offset(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var second = "002_offset";
         final var foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor.getPath(), second);
@@ -237,7 +244,7 @@ public class ContractVerificator {
         assertEquals(second, Manipulator.get(list.get(0), descriptor.getPath()).getObject());
     }
 
-    static <T> void andPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor firstDescriptor) {
+    public static <T> void andPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor firstDescriptor) {
         final var andPredicatePart1 = "001_andPredicate";
 
         final var foo1 = Manipulator.noArgConstructor(clazz);
@@ -251,7 +258,7 @@ public class ContractVerificator {
         repository.save(foo2);
 
         final var andPredicate = Predicates.regex(firstDescriptor, "_andPredicate$");
-        final DescriptivePredicate predicate = Predicates.and(Predicates.regex(firstDescriptor, "^001_"), andPredicate);
+        final Filter predicate = Predicates.and(Predicates.regex(firstDescriptor, "^001_"), andPredicate);
         final List<T> foos = repository.find(predicate, null, null);
 
         assertEquals(1, foos.size());
@@ -260,7 +267,7 @@ public class ContractVerificator {
         assertEquals(2, repository.find(andPredicate, null, null).size());
     }
 
-    static <T> void orPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
+    public static <T> void orPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
         final var first = "001_orPredicate";
         final var foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, descriptor.getPath(), first);
@@ -271,7 +278,7 @@ public class ContractVerificator {
         Manipulator.set(foo2, descriptor.getPath(), second);
         repository.save(foo2);
 
-        final DescriptivePredicate predicate = Predicates.or(Predicates.eq(descriptor, first), Predicates.eq(descriptor, second));
+        final Filter predicate = Predicates.or(Predicates.eq(descriptor, first), Predicates.eq(descriptor, second));
         final List<T> foos = repository.find(predicate, Comparators.asc(descriptor), null);
 
         assertEquals(2, foos.size());
@@ -280,7 +287,7 @@ public class ContractVerificator {
         assertEquals("(def EQUAL 001_orPredicate) OR (def EQUAL 002_orPredicate)", predicate.describe());
     }
 
-    static <T> void lowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+    public static <T> void lowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final var lowerThan = "lowerThan";
         final T foo3 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo3, distinctDescriptor.getPath(), lowerThan);
@@ -292,7 +299,7 @@ public class ContractVerificator {
         Manipulator.set(foo, intDescriptor.getPath(), 10);
         repository.save(foo);
 
-        final DescriptivePredicate predicateLt = Predicates.lt(intDescriptor, 10);
+        final Filter predicateLt = Predicates.lt(intDescriptor, 10);
         final var predicate = Predicates.and(Predicates.eq(distinctDescriptor, lowerThan), predicateLt);
         final List<T> foos = repository.find(predicate, null, null);
 
@@ -301,7 +308,7 @@ public class ContractVerificator {
         assertEquals("value LOWER_THAN 10", predicateLt.describe());
     }
 
-    static <T> void greaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+    public static <T> void greaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final var greaterThan = "greaterThan";
         Manipulator.set(Manipulator.noArgConstructor(clazz), distinctDescriptor.getPath(), greaterThan);
         Manipulator.set(Manipulator.noArgConstructor(clazz), intDescriptor.getPath(), 7);
@@ -313,7 +320,7 @@ public class ContractVerificator {
         Manipulator.set(foo, intDescriptor.getPath(), 10);
         repository.save(foo);
 
-        final DescriptivePredicate predicateGt = Predicates.gt(intDescriptor, 7);
+        final Filter predicateGt = Predicates.gt(intDescriptor, 7);
         final var predicate = Predicates.and(Predicates.eq(distinctDescriptor, greaterThan), Predicates.gt(intDescriptor, 7));
 
         final List<T> foos = repository.find(predicate, null, null);
@@ -324,7 +331,7 @@ public class ContractVerificator {
     }
 
 
-    static <T> void compoundObject(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor) {
+    public static <T> void compoundObject(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
         final Class internalClazz = Manipulator.type(clazz, internalDescriptor.getPath());
         final var compoundObject = "compoundObject";
@@ -333,40 +340,40 @@ public class ContractVerificator {
         Manipulator.set(foo1, compoundDescriptor.getPath(), compoundObject);
         repository.save(foo1);
 
-        final DescriptivePredicate predicate = Predicates.eq(compoundDescriptor, compoundObject);
+        final Filter predicate = Predicates.eq(compoundDescriptor, compoundObject);
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(1, foos.size());
         assertEquals("bar.str EQUAL compoundObject", predicate.describe());
     }
 
-    static <T> void compoundObjectNullHandling(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor compoundDescriptor) {
+    public static <T> void compoundObjectNullHandling(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor compoundDescriptor) {
         final var compoundObjectNullHandling = "compoundObjectNullHandling";
         final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, distinctDescriptor.getPath(), "compoundObjectNullHandling");
         repository.save(foo1);
 
-        final DescriptivePredicate predicate = Predicates.and(Predicates.eq(compoundDescriptor, compoundObjectNullHandling), Predicates.eq(distinctDescriptor, compoundObjectNullHandling));
+        final Filter predicate = Predicates.and(Predicates.eq(compoundDescriptor, compoundObjectNullHandling), Predicates.eq(distinctDescriptor, compoundObjectNullHandling));
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(0, foos.size());
         assertEquals("(bar.str EQUAL compoundObjectNullHandling) AND (def EQUAL compoundObjectNullHandling)", predicate.describe());
     }
 
-    static <T> void nullHandlingLowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+    public static <T> void nullHandlingLowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final T foo3 = Manipulator.noArgConstructor(clazz);
         final var distinct = "nullHandlingLowerThan";
         Manipulator.set(foo3, distinctDescriptor.getPath(), distinct);
         repository.save(foo3);
 
-        final DescriptivePredicate predicate = Predicates.and(Predicates.lt(intDescriptor, 5), Predicates.eq(distinctDescriptor, distinct));
+        final Filter predicate = Predicates.and(Predicates.lt(intDescriptor, 5), Predicates.eq(distinctDescriptor, distinct));
         final var foos = repository.find(predicate, null, null);
 
         assertEquals(0, foos.size());
         assertEquals("(value LOWER_THAN 5) AND (def EQUAL nullHandlingLowerThan)", predicate.describe());
     }
 
-    static <T> void nullHandlingGreaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+    public static <T> void nullHandlingGreaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final T foo3 = Manipulator.noArgConstructor(clazz);
         final var distinct = "nullHandlingGreaterThan";
         Manipulator.set(foo3, distinctDescriptor.getPath(), distinct);
@@ -380,7 +387,7 @@ public class ContractVerificator {
         assertEquals("(def EQUAL nullHandlingGreaterThan) AND (value GREATER_THAN 5)", predicate.describe());
     }
 
-    static <T> void sortingAscendingWithNull(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
+    public static <T> void sortingAscendingWithNull(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
         final Class internalClazz = Manipulator.type(clazz, internalDescriptor.getPath());
         final var sortingAscendingWithNull = "sortingAscendingWithNull";
@@ -397,7 +404,7 @@ public class ContractVerificator {
         Manipulator.set(build, distinctDescriptor.getPath(), sortingAscendingWithNull);
         repository.save(build);
 
-        final var comparator = new DescriptiveComparator(compoundDescriptor, Direction.NATURAL);
+        final var comparator = new Sort(compoundDescriptor, Direction.NATURAL);
         final var predicate = Predicates.eq(distinctDescriptor, sortingAscendingWithNull);
         final var foos = repository.find(predicate, comparator, null);
         assertEquals(2, foos.size());
@@ -406,7 +413,7 @@ public class ContractVerificator {
         assertEquals("bar.str NATURAL", comparator.describe());
     }
 
-    static <T> void sortingDescendingWithNull(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
+    public static <T> void sortingDescendingWithNull(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
         final Class internalClazz = Manipulator.type(clazz, internalDescriptor.getPath());
         final var sortingDescendingWithNull = "sortingDescendingWithNull";
@@ -422,7 +429,7 @@ public class ContractVerificator {
         Manipulator.set(build1, compoundDescriptor.getPath(), first);
         repository.save(build1);
 
-        final var comparator = new DescriptiveComparator(compoundDescriptor, Direction.REVERSE);
+        final var comparator = new Sort(compoundDescriptor, Direction.REVERSE);
         final var predicate = Predicates.eq(distinctDescriptor, sortingDescendingWithNull);
         final var foos = repository.find(predicate, comparator, null);
         assertEquals(2, foos.size());
@@ -431,20 +438,72 @@ public class ContractVerificator {
         assertEquals("bar.str REVERSE", comparator.describe());
     }
 
-    static <T> void sequenceContract(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorSeq) {
-        final var saved = repository.save(Manipulator.noArgConstructor(clazz));
-        assertEquals(1, Manipulator.get(saved, descriptorSeq.getPath()).getObject());
+    public static <T> void idStringContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
+        final var entity = Manipulator.noArgConstructor(clazz);
+        assertEquals(null, Manipulator.get(entity, idDescriptor.getPath()).getObject());
+        final var saved = repository.save(entity);
+        assertNotNull(Manipulator.get(saved, idDescriptor.getPath()).getObject());
     }
 
-    static <T> void sequenceContractFollowing(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorSeq) {
-        final var foo1 = Manipulator.noArgConstructor(clazz);
-        final var first = repository.save(foo1);
+    public static <T> void idStringContractNextValue(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
+        final var entity = Manipulator.noArgConstructor(clazz);
+        assertEquals(null, Manipulator.get(entity, idDescriptor.getPath()).getObject());
+        final var first = repository.save(entity);
+        final var firstId = Manipulator.get(first, idDescriptor.getPath()).getObject();
+        assertNotNull(firstId);
 
-        final var foo2 = Manipulator.noArgConstructor(clazz);
-        final var second = repository.save(foo2);
-        final var firstSeq = (Comparable)Manipulator.get(first, descriptorSeq.getPath()).getObject();
-        final var secondSeq = (Comparable)Manipulator.get(second, descriptorSeq.getPath()).getObject();
-        assertTrue(Comparator.<Comparable>naturalOrder().compare(firstSeq, secondSeq) < 0);
+        final var second = repository.save(entity);
+        final var secondId = Manipulator.get(second, idDescriptor.getPath()).getObject();
+        assertNotNull(secondId);
+        assertNotEquals(firstId, secondId);
+
+    }
+
+    public static <T> void versionContract(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorVersion) {
+        final var entity = Manipulator.noArgConstructor(clazz);
+        assertEquals(null, Manipulator.get(entity, descriptorVersion.getPath()).getObject());
+        final var saved = repository.save(entity);
+        assertEquals(0, Manipulator.get(saved, descriptorVersion.getPath()).getObject());
+    }
+
+    public static <T> void versionContractNextValue(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorVersion) {
+        final var entity = Manipulator.noArgConstructor(clazz);
+        assertEquals(null, Manipulator.get(entity, descriptorVersion.getPath()).getObject());
+        final var saved = repository.save(entity);
+        assertEquals(0, Manipulator.get(saved, descriptorVersion.getPath()).getObject());
+
+        final var next = repository.save(saved);
+        assertEquals(1, Manipulator.get(next, descriptorVersion.getPath()).getObject());
+    }
+
+    public static <T> void versionContractOptimisticLock(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorId, final Descriptor descriptorVersion) {
+        final var entity = Manipulator.noArgConstructor(clazz);
+        assertEquals(null, Manipulator.get(entity, descriptorVersion.getPath()).getObject());
+        final var saved = repository.save(entity);
+        assertEquals(0, Manipulator.get(saved, descriptorVersion.getPath()).getObject());
+
+        final var next = repository.save(saved);
+        assertEquals(1, Manipulator.get(next, descriptorVersion.getPath()).getObject());
+
+        Manipulator.set(next, descriptorVersion.getPath(), 0);
+        final var lock = assertThrows(OptimisticLockException.class, () -> repository.save(next));
+        final var id =  Manipulator.get(next, descriptorId.getPath()).getObject();
+        final var fromDb = repository.find(Predicates.eq(descriptorId, id), null, null).get(0);
+        assertEquals(1, Manipulator.get(fromDb, descriptorVersion.getPath()).getObject());
+
+    }
+
+    private static <T> T assertThrows(final Class<T> clazz, final Executable executable) {
+        try {
+            executable.execute();
+            throw new RuntimeException("Exception was not thrown.");
+        } catch (final Exception ex) {
+            if (clazz.isInstance(ex)) {
+                return (T) ex;
+            } else {
+                throw new RuntimeException("Unexpected type of exception", ex);
+            }
+        }
     }
 
     private static void assertTrue(final boolean test) {
@@ -456,6 +515,18 @@ public class ContractVerificator {
     private static void assertEquals(final Object expected, final Object actual) {
         if (!Objects.equals(expected, actual)) {
             throw new RuntimeException("Values are not equals, expected: " + expected + ", actual: " + actual);
+        }
+    }
+
+    private static void assertNotEquals(final Object expected, final Object actual) {
+        if (Objects.equals(expected, actual)) {
+            throw new RuntimeException("Values are equals but they should not");
+        }
+    }
+
+    private static void assertNotNull(final Object value) {
+        if (value == null) {
+            throw new RuntimeException("value is null");
         }
     }
 

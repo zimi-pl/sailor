@@ -12,20 +12,18 @@ public class ContractsTests {
     @Test
     void testSupersetContract() {
         final Contract<Foo> contract = Contract.repository(Foo.class)
-                .sequence(SFoo.foo.seq);
+                .version(SFoo.foo.version);
 
         final var contractForPort = Contract.repository(Foo.class);
         final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contractForPort);
-        final var ex = Assertions.assertThrows(RuntimeException.class, () -> {
-            ContractVerificator.assertThese(contract, differentSupplier);
-        });
+        Assertions.assertThrows(RuntimeException.class, () -> ContractVerificator.assertThese(contract, differentSupplier));
     }
 
     @Test
     void testSubsetContract() {
         final Contract<Foo> contract = Contract.repository(Foo.class);
         final var contractForPort = Contract.repository(Foo.class)
-                .sequence(SFoo.foo.seq);
+                .version(SFoo.foo.version);
 
         final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contractForPort);
         ContractVerificator.assertThese(contract, differentSupplier);

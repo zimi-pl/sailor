@@ -13,11 +13,13 @@ import pl.zimi.repository.annotation.Queryable;
 @AllArgsConstructor
 public class Foo {
 
+    private String id;
     private String abc;
     private String def;
     private Bar bar;
     private String test;
     private Integer value;
     private Integer seq;
+    private Integer version;
 
 }

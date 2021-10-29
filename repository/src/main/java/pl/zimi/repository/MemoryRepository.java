@@ -3,11 +3,9 @@ package pl.zimi.repository;
 import com.google.gson.Gson;
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.contract.Contract;
+import pl.zimi.repository.contract.OptimisticLockException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,15 +14,14 @@ import java.util.stream.Stream;
 public class MemoryRepository<T> implements Repository<T> {
 
     private final Gson gson = new Gson();
-    private final List<T> source = new ArrayList<>();
+    private final Map<Object, T> source = new HashMap<>();
     private final Contract<T> contract;
-    private final Map<Descriptor, AtomicInteger> counters = new HashMap<>();
+    private final AtomicInteger idCounter = new AtomicInteger(0);
+    private final Descriptor versionDescriptor;
 
     public MemoryRepository(final Contract<T> contract) {
         this.contract = contract;
-        for (final Descriptor descriptor : contract.getSequences()) {
-            counters.put(descriptor, new AtomicInteger(1));
-        }
+        this.versionDescriptor = contract.getVersion();
     }
 
     private T deepCopy(final T toCopy) {
@@ -35,18 +32,36 @@ public class MemoryRepository<T> implements Repository<T> {
     @Override
     public T save(T entity) {
         final T copied = deepCopy(entity);
-        for (final Map.Entry<Descriptor, AtomicInteger> entry : counters.entrySet()) {
-            Manipulator.set(copied, entry.getKey().getPath(), entry.getValue().getAndIncrement());
+        if (contract.getId() != null && Manipulator.get(copied, contract.getId().getPath()).getObject() == null) {
+            Manipulator.set(copied, contract.getId().getPath(), Integer.toString(idCounter.getAndIncrement()));
+            if (versionDescriptor != null) {
+                Manipulator.set(copied, versionDescriptor.getPath(), 0);
+            }
+        } else if (contract.getId() != null && versionDescriptor != null) {
+            final var previousVersion = Manipulator.get(entity, versionDescriptor.getPath()).getObject();
+            final var id = Manipulator.get(entity, contract.getId().getPath()).getObject();
+            final var currentEntity = source.get(id);
+            if (currentEntity != null) {
+                final var dbVersion = Manipulator.get(currentEntity, versionDescriptor.getPath()).getObject();
+                if (Objects.equals(previousVersion, dbVersion)) {
+                    Manipulator.set(copied, versionDescriptor.getPath(), ((Integer) previousVersion) + 1);
+                } else {
+                    throw new OptimisticLockException("Given version: " + previousVersion + ", db version: " + dbVersion);
+                }
+            } else {
+                throw new OptimisticLockException("Given version: " + previousVersion + ", db version: null");
+            }
         }
-        source.add(copied);
-        return copied;
+        final var id = contract.getId() != null ? Manipulator.get(copied, contract.getId().getPath()).getObject() : UUID.randomUUID().toString();
+        source.put(id, copied);
+        return deepCopy(copied);
     }
 
     @Override
-    public List<T> find(final DescriptivePredicate predicate, final DescriptiveComparator comparator, final LimitOffset limit) {
-        final Stream<T> streamed = source.stream();
-        final Stream<T> filtered = predicate != null ? (Stream<T>)streamed.filter(predicate) : streamed;
-        final Stream<T> sorted = comparator != null ? (Stream<T>)filtered.sorted(comparator) : filtered;
+    public List<T> find(final Filter filter, final Sort comparator, final LimitOffset limit) {
+        final Stream<T> streamed = source.values().stream();
+        final Stream<T> filtered = filter != null ? streamed.filter(filter::test) : streamed;
+        final Stream<T> sorted = comparator != null ? filtered.sorted(comparator::compare) : filtered;
         final Stream<T> skipped = limit != null && limit.getOffset() != null ? sorted.skip(limit.getOffset()) : sorted;
         final Stream<T> limited = limit != null && limit.getLimit() != null ? skipped.limit(limit.getLimit()) : skipped;
         return limited

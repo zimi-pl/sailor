@@ -29,16 +29,19 @@ public class QueryableProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnv) {
 
-        List<TypeElement> classesToHandle = (List<TypeElement>) roundEnv.getElementsAnnotatedWith(Queryable.class).stream().filter(e -> e.getKind() == ElementKind.CLASS).collect(Collectors.toList());
+        List<TypeElement> classesToHandle = (List<TypeElement>) roundEnv.getElementsAnnotatedWith(Queryable.class)
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.CLASS)
+                .collect(Collectors.toList());
         List<String> classesToHandleStrings = classesToHandle.stream().map(e -> e.getQualifiedName().toString()).collect(Collectors.toList());
 
 
         for (Element e : classesToHandle) {
-            String name = capitalize(e.getSimpleName().toString());
-            TypeElement clazz = (TypeElement)e;
-            PackageElement pack = (PackageElement) e.getEnclosingElement();
+            final String name = capitalize(e.getSimpleName().toString());
+            final TypeElement clazz = (TypeElement)e;
+            final PackageElement pack = (PackageElement) e.getEnclosingElement();
             try {
-                JavaFileObject f = processingEnv.getFiler().
+                final JavaFileObject f = processingEnv.getFiler().
                         createSourceFile(pack.getQualifiedName() + ".S" + clazz.getSimpleName());
                 processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE,
                         "Creating " + f.toUri());

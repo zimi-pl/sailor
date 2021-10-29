@@ -21,7 +21,7 @@ public class Descriptor {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Descriptor that = (Descriptor) o;
+        final Descriptor that = (Descriptor) o;
         return Objects.equals(parent, that.parent) && Objects.equals(path, that.path);
     }
 

@@ -8,26 +8,36 @@ import java.util.List;
 public class Contract<T> {
 
     private final Class<T> entityClass;
-    private final List<Descriptor> sequences = new ArrayList<>();
+    private Descriptor version;
+    private Descriptor id;
 
     public Contract(final Class<T> entityClass) {
         this.entityClass = entityClass;
     }
 
     public static <U> Contract<U> repository(final Class<U> entityClass) {
-        return new Contract<U>(entityClass);
+        return new Contract<>(entityClass);
     }
 
-    public Contract<T> sequence(final Descriptor value) {
-        sequences.add(value);
+    public Contract<T> version(final Descriptor value) {
+        version = value;
         return this;
     }
 
-    public List<Descriptor> getSequences() {
-        return sequences;
+    public Contract<T> id(final Descriptor value) {
+        id = value;
+        return this;
     }
 
     Class<T> getEntityClass() {
         return entityClass;
+    }
+
+    public Descriptor getVersion() {
+        return version;
+    }
+
+    public Descriptor getId() {
+        return id;
     }
 }

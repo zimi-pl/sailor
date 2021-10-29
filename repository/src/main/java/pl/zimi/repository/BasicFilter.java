@@ -5,13 +5,13 @@ import pl.zimi.repository.annotation.Descriptor;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-class BasicDescriptivePredicate implements DescriptivePredicate {
+class BasicFilter implements Filter {
 
     private final Descriptor path;
     private final Object expectedValue;
     private final Operator operator;
 
-    BasicDescriptivePredicate(Descriptor path, Object expectedValue, Operator operator) {
+    BasicFilter(Descriptor path, Object expectedValue, Operator operator) {
         this.path = path;
         this.expectedValue = expectedValue;
         this.operator = operator;

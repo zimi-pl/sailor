@@ -13,7 +13,7 @@ public class RepositoryTest {
 
     @TestFactory
     List<DynamicTest> repositoryTest() {
-        final var contract = Contract.repository(Foo.class).sequence(SFoo.foo.seq);
+        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version);
         return ContractVerificator.test(contract, MemoryPort::port)
                 .stream()
                 .map(t -> dynamicTest("ContractVerificator." + t.name, () -> t.runnable.run()))

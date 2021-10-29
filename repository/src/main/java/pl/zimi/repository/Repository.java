@@ -7,7 +7,7 @@ public interface Repository<T> {
 
     T save(final T entity);
 
-    List<T> find(final DescriptivePredicate predicate, final DescriptiveComparator comparator, final LimitOffset limit);
+    List<T> find(final Filter predicate, final Sort comparator, final LimitOffset limit);
 
     List<T> findAll();
 
