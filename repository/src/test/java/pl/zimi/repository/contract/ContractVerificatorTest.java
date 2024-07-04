@@ -140,4 +140,16 @@ class ContractVerificatorTest {
     void delete() {
         ContractVerificator.delete(MemoryPort.port(contract), Foo.class, SFoo.foo.def);
     }
+
+    @Test
+    void missingIdContract() {
+        final var contract = Contract.repository(Foo.class);
+        ContractVerificator.missingIdContract(MemoryPort.port(contract), Foo.class);
+    }
+
+    @Test
+    void existingIdContract() {
+        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
+        ContractVerificator.existingIdContract(MemoryPort.port(contract), Foo.class);
+    }
 }
