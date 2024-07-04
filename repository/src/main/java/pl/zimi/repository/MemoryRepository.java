@@ -7,7 +7,6 @@ import pl.zimi.repository.contract.OptimisticLockException;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,7 +59,7 @@ public class MemoryRepository<T> implements Repository<T> {
     @Override
     public List<T> find(final Query query) {
         final var filter = query.getFilter();
-        final var sort = query.getSort();
+        final var sort = query.getSorter();
         final var limit = query.getLimitOffset();
         final Stream<T> streamed = source.values().stream();
         final Stream<T> filtered = filter != null ? streamed.filter(filter::test) : streamed;

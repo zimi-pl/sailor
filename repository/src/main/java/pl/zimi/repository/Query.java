@@ -9,7 +9,7 @@ public class Query {
 
     Filter filter;
 
-    Sort sort;
+    Sorter sorter;
 
     LimitOffset limitOffset;
 }

@@ -4,12 +4,12 @@ import pl.zimi.repository.annotation.Descriptor;
 
 import java.util.Comparator;
 
-public class Sort {
+public class Sorter {
 
     private final Descriptor path;
     private final Direction direction;
 
-    public Sort(Descriptor path, final Direction direction) {
+    public Sorter(Descriptor path, final Direction direction) {
         this.path = path;
         this.direction = direction;
     }

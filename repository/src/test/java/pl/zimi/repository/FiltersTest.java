@@ -65,7 +65,7 @@ public class FiltersTest {
 
     @Test
     void descriptiveComparator() {
-        final Sort asc = Comparators.asc(SFoo.foo.abc);
+        final Sorter asc = Sorters.asc(SFoo.foo.abc);
         Assertions.assertEquals("abc", asc.getPath());
         Assertions.assertEquals(Direction.NATURAL, asc.getDirection());
         Assertions.assertEquals("abc NATURAL", asc.describe());

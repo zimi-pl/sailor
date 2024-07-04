@@ -5,8 +5,8 @@ public class Queries {
         return new Query(filter, null, null);
     }
 
-    public static Query query(Filter filter, Sort sort, LimitOffset limitOffset) {
-        return new Query(filter, sort, limitOffset);
+    public static Query query(Filter filter, Sorter sorter, LimitOffset limitOffset) {
+        return new Query(filter, sorter, limitOffset);
     }
 
     public static Query all() {

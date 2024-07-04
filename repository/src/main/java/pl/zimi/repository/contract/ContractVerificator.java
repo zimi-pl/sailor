@@ -1,6 +1,6 @@
 package pl.zimi.repository.contract;
 
-import pl.zimi.repository.Comparators;
+import pl.zimi.repository.Sorters;
 import pl.zimi.repository.*;
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.annotation.TypedDescriptor;
@@ -203,7 +203,7 @@ public class ContractVerificator {
         Manipulator.set(foo2, descriptor, second);
         repository.save(foo2);
 
-        final List<T> list = repository.find(Queries.query(null, Comparators.asc(descriptor), null));
+        final List<T> list = repository.find(Queries.query(null, Sorters.asc(descriptor), null));
         final var collected = list.stream()
                 .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
                 .collect(Collectors.toList());
@@ -224,7 +224,7 @@ public class ContractVerificator {
         Manipulator.set(foo1, descriptor, second);
         repository.save(foo1);
 
-        final List<T> list = repository.find(Queries.query(null, Comparators.desc(descriptor), null));
+        final List<T> list = repository.find(Queries.query(null, Sorters.desc(descriptor), null));
         final var collected = list.stream()
                 .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
                 .collect(Collectors.toList());
@@ -247,7 +247,7 @@ public class ContractVerificator {
 
         final var a = Filters.eq(descriptor, second);
         final var b = Filters.eq(descriptor, first);
-        final List<T> list = repository.find(Queries.query(Filters.or(a, b), Comparators.asc(descriptor), new LimitOffset(1L, null)));
+        final List<T> list = repository.find(Queries.query(Filters.or(a, b), Sorters.asc(descriptor), new LimitOffset(1L, null)));
         assertEquals(1, list.size());
         assertEquals(first, Manipulator.get(list.get(0), descriptor).getObject());
     }
@@ -264,7 +264,7 @@ public class ContractVerificator {
         repository.save(foo1);
 
         var predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
-        final List<T> list = repository.find(Queries.query(predicate, Comparators.asc(descriptor), new LimitOffset(null, 1L)));
+        final List<T> list = repository.find(Queries.query(predicate, Sorters.asc(descriptor), new LimitOffset(null, 1L)));
         assertEquals(1, list.size());
         assertEquals(second, Manipulator.get(list.get(0), descriptor).getObject());
     }
@@ -304,7 +304,7 @@ public class ContractVerificator {
         repository.save(foo2);
 
         final Filter predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
-        final List<T> foos = repository.find(Queries.query(predicate, Comparators.asc(descriptor), null));
+        final List<T> foos = repository.find(Queries.query(predicate, Sorters.asc(descriptor), null));
 
         assertEquals(2, foos.size());
         assertEquals(first, Manipulator.get(foos.get(0), descriptor).getObject());
@@ -429,7 +429,7 @@ public class ContractVerificator {
         Manipulator.set(build, distinctDescriptor, sortingAscendingWithNull);
         repository.save(build);
 
-        final var comparator = new Sort(compoundDescriptor, Direction.NATURAL);
+        final var comparator = new Sorter(compoundDescriptor, Direction.NATURAL);
         final var predicate = Filters.eq(distinctDescriptor, sortingAscendingWithNull);
         final var foos = repository.find(Queries.query(predicate, comparator, null));
         assertEquals(2, foos.size());
@@ -454,7 +454,7 @@ public class ContractVerificator {
         Manipulator.set(build1, compoundDescriptor, first);
         repository.save(build1);
 
-        final var comparator = new Sort(compoundDescriptor, Direction.REVERSE);
+        final var comparator = new Sorter(compoundDescriptor, Direction.REVERSE);
         final var predicate = Filters.eq(distinctDescriptor, sortingDescendingWithNull);
         final var foos = repository.find(Queries.query(predicate, comparator, null));
         assertEquals(2, foos.size());
