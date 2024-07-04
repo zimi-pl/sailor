@@ -52,11 +52,13 @@ public class ContractVerificator {
 
         if (contract.getId() == null) {
             tests.add(new Test("missingIdContract", () -> missingIdContract(supplier.apply(contract), contract.getEntityClass())));
+            tests.add(new Test("findByIdFailsForMissingIdContract", () -> findByIdFailsForMissingIdContract(supplier.apply(contract))));
         } else {
             tests.add(new Test("existingIdContract", () -> existingIdContract(supplier.apply(contract), contract.getEntityClass())));
             tests.add(new Test("idStringContract", () -> idStringContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("idStringContractNextValue", () -> idStringContractNextValue(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("delete", () -> delete(repository, contract.getEntityClass(), distinctDescriptor)));
+            tests.add(new Test("findByIdWorksForExistingIdContract", () -> findByIdWorksForExistingIdContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
         }
 
         if (contract.getVersion() != null) {
@@ -494,6 +496,20 @@ public class ContractVerificator {
         assertEquals(2, result.size());
     }
 
+    public static <T> void findByIdFailsForMissingIdContract(final Repository<T> repository) {
+        assertThrows(UnsupportedOperationException.class, () -> repository.findById("test"));
+    }
+
+    public static <T> void findByIdWorksForExistingIdContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
+        final var entity = Manipulator.noArgConstructor(clazz);
+
+        final var saved = repository.save(entity);
+        final var id = Manipulator.get(saved, idDescriptor).getObject();
+
+        final var retrieved = repository.findById(id).get();
+        assertEquals(id, Manipulator.get(retrieved, idDescriptor).getObject());
+    }
+
     public static <T> void existingIdContract(final Repository<T> repository, final Class<T> clazz) {
         final var entity = Manipulator.noArgConstructor(clazz);
 
@@ -536,7 +552,6 @@ public class ContractVerificator {
         final var id =  Manipulator.get(next, descriptorId).getObject();
         final var fromDb = repository.find(Queries.filter(Filters.eq(descriptorId, id))).get(0);
         assertEquals(1, Manipulator.get(fromDb, descriptorVersion).getObject());
-
     }
 
     private static <T> T assertThrows(final Class<T> clazz, final Executable executable) {

@@ -2,10 +2,6 @@ package pl.zimi.repository.contract;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 class ContractVerificatorTest {
@@ -145,6 +141,18 @@ class ContractVerificatorTest {
     void missingIdContract() {
         final var contract = Contract.repository(Foo.class);
         ContractVerificator.missingIdContract(MemoryPort.port(contract), Foo.class);
+    }
+
+    @Test
+    void findByIdFailsForMissingIdContract() {
+        final var contract = Contract.repository(Foo.class);
+        ContractVerificator.findByIdFailsForMissingIdContract(MemoryPort.port(contract));
+    }
+
+    @Test
+    void findByIdWorksForExistingIdContract() {
+        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
+        ContractVerificator.findByIdWorksForExistingIdContract(MemoryPort.port(contract), Foo.class, SFoo.foo.id);
     }
 
     @Test

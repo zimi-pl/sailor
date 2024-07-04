@@ -57,6 +57,19 @@ public class MemoryRepository<T> implements Repository<T> {
     }
 
     @Override
+    public Optional<T> findById(Object id) {
+        if (contract.getId() == null) {
+            throw new UnsupportedOperationException();
+        }
+        final var list = find(Queries.filter(Filters.eq(contract.getId(), id)));
+        if (list.isEmpty()) {
+            return Optional.empty();
+        } else {
+            return Optional.of(list.get(0));
+        }
+    }
+
+    @Override
     public List<T> find(final Query query) {
         final var filter = query.getFilter();
         final var sort = query.getSorter();
