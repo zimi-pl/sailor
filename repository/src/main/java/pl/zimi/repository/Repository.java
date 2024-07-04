@@ -11,6 +11,8 @@ public interface Repository<T> {
 
     List<T> findAll();
 
+    T delete(T entity);
+
     List<T> deleteAll(final Predicate<T> predicate);
 
 }

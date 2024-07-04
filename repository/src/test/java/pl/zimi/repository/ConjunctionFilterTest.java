@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConjunctionFilterTest {
 
-
     @Test
     void unknownOperator() {
-        assertThrows(IllegalArgumentException.class, () -> new ConjunctionFilter("TEST", Predicates.eq(new Descriptor(null, "a"), "bar1"), Predicates.eq(new Descriptor(null, "a"), "bar2")));
+        final var eqBar1 = Filters.eq(new Descriptor(null, "a"), "bar1");
+        final var eqBar2 = Filters.eq(new Descriptor(null, "a"), "bar2");
+        assertThrows(IllegalArgumentException.class, () -> new ConjunctionFilter("TEST", eqBar1, eqBar2));
     }
 
 }
+

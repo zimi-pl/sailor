@@ -74,10 +74,16 @@ public class MemoryRepository<T> implements Repository<T> {
         return find(null, null, null);
     }
 
+    public T delete(T entity) {
+//        contract.getId() != null && Manipulator.get(copied, contract.getId()).getObject() == null) {
+        Object id = Manipulator.get(entity, contract.getId()).getObject();
+        source.remove(id);
+        return entity;
+    }
+
     @Override
     public List<T> deleteAll(Predicate<T> predicate) {
         return null;
     }
-
 
 }

@@ -2,7 +2,7 @@ package pl.zimi.repository;
 
 import pl.zimi.repository.annotation.Descriptor;
 
-public class Predicates {
+public class Filters {
     public static Filter eq(final Descriptor descriptor, final Object value) {
         return new BasicFilter(descriptor, value, Operator.EQUAL);
     }

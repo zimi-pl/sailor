@@ -136,4 +136,8 @@ class ContractVerificatorTest {
     void versionContractOptimisticLock() {
         ContractVerificator.versionContractOptimisticLock(MemoryPort.port(contract), Foo.class, SFoo.foo.id, SFoo.foo.version);
     }
+    @Test
+    void delete() {
+        ContractVerificator.delete(MemoryPort.port(contract), Foo.class, SFoo.foo.def);
+    }
 }
