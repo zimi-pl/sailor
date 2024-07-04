@@ -2,4 +2,5 @@ rootProject.name = 'repository'
 include 'annotation'
 include 'repository'
 include 'examples'
+include 'flashcards'
 
