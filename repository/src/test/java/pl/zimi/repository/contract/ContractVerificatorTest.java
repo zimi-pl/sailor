@@ -156,6 +156,12 @@ class ContractVerificatorTest {
     }
 
     @Test
+    void findByIdReturnsEmptyOptionalForExistingIdContract() {
+        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
+        ContractVerificator.findByIdWorksForExistingIdContract(MemoryPort.port(contract), Foo.class, SFoo.foo.id);
+    }
+
+    @Test
     void existingIdContract() {
         final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
         ContractVerificator.existingIdContract(MemoryPort.port(contract), Foo.class);

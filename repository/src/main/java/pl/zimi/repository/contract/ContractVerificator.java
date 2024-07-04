@@ -59,6 +59,7 @@ public class ContractVerificator {
             tests.add(new Test("idStringContractNextValue", () -> idStringContractNextValue(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("delete", () -> delete(repository, contract.getEntityClass(), distinctDescriptor)));
             tests.add(new Test("findByIdWorksForExistingIdContract", () -> findByIdWorksForExistingIdContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
+            tests.add(new Test("findByIdReturnsEmptyOptionalForExistingIdContract", () -> findByIdReturnsEmptyOptionalForExistingIdContract(supplier.apply(contract))));
         }
 
         if (contract.getVersion() != null) {
@@ -508,6 +509,11 @@ public class ContractVerificator {
 
         final var retrieved = repository.findById(id).get();
         assertEquals(id, Manipulator.get(retrieved, idDescriptor).getObject());
+    }
+
+    public static <T> void findByIdReturnsEmptyOptionalForExistingIdContract(final Repository<T> repository) {
+        final var retrieved = repository.findById("missing-id");
+        assertEquals(Optional.empty(), retrieved);
     }
 
     public static <T> void existingIdContract(final Repository<T> repository, final Class<T> clazz) {
