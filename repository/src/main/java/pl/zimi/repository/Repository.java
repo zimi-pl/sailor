@@ -11,6 +11,4 @@ public interface Repository<T> {
 
     T delete(T entity);
 
-    List<T> deleteAll(final Predicate<T> predicate);
-
 }
