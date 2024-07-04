@@ -89,7 +89,7 @@ class FlashcardServiceTest {
 
         // then
         assertEquals(AnswerResult.correct(), returned);
-        assertEquals(MemorizationLevel.level(1), flashcardRepository.find(Queries.filter(Filters.eq(SFlashcard.flashcard.id, saved.id))).get(0).getMemorizationLevel());
+        assertEquals(MemorizationLevel.level(1), flashcardRepository.findById(saved.id).get().getMemorizationLevel());
     }
 
     @Test
@@ -113,7 +113,7 @@ class FlashcardServiceTest {
 
         // then
         assertEquals(AnswerResult.mistake(), returned);
-        assertEquals(MemorizationLevel.none(), flashcardRepository.find(Queries.filter(Filters.eq(SFlashcard.flashcard.id, saved.id))).get(0).getMemorizationLevel());
+        assertEquals(MemorizationLevel.none(), flashcardRepository.findById(saved.id).get().getMemorizationLevel());
     }
 
 }

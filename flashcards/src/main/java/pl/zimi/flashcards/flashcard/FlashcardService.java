@@ -21,11 +21,11 @@ public class FlashcardService {
     }
 
     public AnswerResult answer(Answer answer) {
-        final var flashcards = flashcardRepository.find(Queries.filter(Filters.eq(SFlashcard.flashcard.id, answer.getFlashcardId())));
+        final var flashcards = flashcardRepository.findById(answer.getFlashcardId());
         if (flashcards.isEmpty()) {
             return AnswerResult.failure();
         }
-        final var flashcard = flashcards.get(0);
+        final var flashcard = flashcards.get();
         if (flashcard.getTranslation().equals(answer.getTranslation())) {
             flashcard.memorizationLevel.upgrade();
             flashcardRepository.save(flashcard);
