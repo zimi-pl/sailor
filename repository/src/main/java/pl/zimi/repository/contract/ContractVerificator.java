@@ -53,7 +53,7 @@ public class ContractVerificator {
         if (contract.getId() == null) {
             tests.add(new Test("missingIdContract", () -> missingIdContract(supplier.apply(contract), contract.getEntityClass())));
         } else {
-            tests.add(new Test("existingIdContract", () -> missingIdContract(supplier.apply(contract), contract.getEntityClass())));
+            tests.add(new Test("existingIdContract", () -> existingIdContract(supplier.apply(contract), contract.getEntityClass())));
             tests.add(new Test("idStringContract", () -> idStringContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("idStringContractNextValue", () -> idStringContractNextValue(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("delete", () -> delete(repository, contract.getEntityClass(), distinctDescriptor)));
