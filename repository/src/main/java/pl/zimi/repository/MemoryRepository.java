@@ -58,20 +58,18 @@ public class MemoryRepository<T> implements Repository<T> {
     }
 
     @Override
-    public List<T> find(final Filter filter, final Sort comparator, final LimitOffset limit) {
+    public List<T> find(final Query query) {
+        final var filter = query.getFilter();
+        final var sort = query.getSort();
+        final var limit = query.getLimitOffset();
         final Stream<T> streamed = source.values().stream();
         final Stream<T> filtered = filter != null ? streamed.filter(filter::test) : streamed;
-        final Stream<T> sorted = comparator != null ? filtered.sorted(comparator::compare) : filtered;
+        final Stream<T> sorted = sort != null ? filtered.sorted(sort::compare) : filtered;
         final Stream<T> skipped = limit != null && limit.getOffset() != null ? sorted.skip(limit.getOffset()) : sorted;
         final Stream<T> limited = limit != null && limit.getLimit() != null ? skipped.limit(limit.getLimit()) : skipped;
         return limited
                 .map(this::deepCopy)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<T> findAll() {
-        return find(null, null, null);
     }
 
     public T delete(T entity) {

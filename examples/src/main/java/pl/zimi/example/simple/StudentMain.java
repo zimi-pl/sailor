@@ -2,6 +2,7 @@ package pl.zimi.example.simple;
 
 import pl.zimi.repository.Filter;
 import pl.zimi.repository.Filters;
+import pl.zimi.repository.Queries;
 import pl.zimi.repository.Repository;
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.contract.MemoryPort;
@@ -18,8 +19,8 @@ public class StudentMain {
 
 
         Filter filter = Filters.eq(SStudent.student.firstName, "John");
-//
-        final var students = studentRepository.find(filter, null, null);
+
+        final var students = studentRepository.find(Queries.filter(filter));
 
         System.out.println(students);
     }
