@@ -2,7 +2,11 @@ package pl.zimi.repository;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import pl.zimi.repository.contract.*;
+import pl.zimi.repository.contract.Contract;
+import pl.zimi.repository.contract.ContractVerificator;
+import pl.zimi.repository.contract.MemoryPort;
+import pl.zimi.repository.example.Foo;
+import pl.zimi.repository.example.SFoo;
 
 import java.util.List;
 import java.util.stream.Collectors;

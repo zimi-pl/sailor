@@ -1,9 +1,9 @@
 package pl.zimi.example.simple;
 
-import pl.zimi.repository.Filter;
-import pl.zimi.repository.Filters;
-import pl.zimi.repository.Queries;
-import pl.zimi.repository.Repository;
+import pl.zimi.repository.query.Filter;
+import pl.zimi.repository.query.Filters;
+import pl.zimi.repository.query.Queries;
+import pl.zimi.repository.query.Repository;
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.contract.MemoryPort;
 

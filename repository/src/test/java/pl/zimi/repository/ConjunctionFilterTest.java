@@ -2,6 +2,8 @@ package pl.zimi.repository;
 
 import pl.zimi.repository.annotation.Descriptor;
 import org.junit.jupiter.api.Test;
+import pl.zimi.repository.query.ConjunctionFilter;
+import pl.zimi.repository.query.Filters;
 
 import static org.junit.jupiter.api.Assertions.*;
 

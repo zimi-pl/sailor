@@ -2,8 +2,12 @@ package pl.zimi.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pl.zimi.repository.Repository;
-import pl.zimi.repository.contract.*;
+import pl.zimi.repository.contract.Contract;
+import pl.zimi.repository.contract.ContractVerificator;
+import pl.zimi.repository.contract.MemoryPort;
+import pl.zimi.repository.example.Foo;
+import pl.zimi.repository.example.SFoo;
+import pl.zimi.repository.query.Repository;
 
 import java.util.function.Function;
 

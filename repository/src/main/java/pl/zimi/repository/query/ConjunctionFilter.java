@@ -1,4 +1,4 @@
-package pl.zimi.repository;
+package pl.zimi.repository.query;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public class ConjunctionFilter implements Filter {
     private final Filter first;
     private final Filter second;
 
-    ConjunctionFilter(final String operator, final Filter first, final Filter second) {
+    public ConjunctionFilter(final String operator, final Filter first, final Filter second) {
         this.operator = operator;
         assertOperator();
         this.first = first;

@@ -2,8 +2,9 @@ package pl.zimi.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import pl.zimi.repository.contract.Foo;
-import pl.zimi.repository.contract.SFoo;
+import pl.zimi.repository.example.Foo;
+import pl.zimi.repository.example.SFoo;
+import pl.zimi.repository.query.*;
 
 public class FiltersTest {
 

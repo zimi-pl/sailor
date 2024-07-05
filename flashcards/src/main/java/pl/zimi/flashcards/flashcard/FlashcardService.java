@@ -1,19 +1,21 @@
 package pl.zimi.flashcards.flashcard;
 
 import lombok.RequiredArgsConstructor;
-import pl.zimi.repository.*;
+import pl.zimi.repository.query.*;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 public class FlashcardService {
 
     final Repository<Flashcard> flashcardRepository;
 
-    Flashcard next(UserId userId) {
+    Optional<Flashcard> next(UserId userId) {
         final var filter = Filters.eq(SFlashcard.flashcard.userId, userId);
         final var sorter = Sorters.asc(SFlashcard.flashcard.memorizationLevel.numberOfSuccesses);
         final var query = Queries.query(filter, sorter, new LimitOffset(1L, 0L));
         final var found = flashcardRepository.find(query);
-        return found.isEmpty() ? null : found.get(0);
+        return found.isEmpty() ? Optional.empty() : Optional.of(found.get(0));
     }
 
     public Flashcard add(Flashcard flashcard) {

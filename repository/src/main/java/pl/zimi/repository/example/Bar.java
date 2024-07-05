@@ -1,4 +1,4 @@
-package pl.zimi.repository.contract;
+package pl.zimi.repository.example;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,9 @@ import pl.zimi.repository.annotation.Queryable;
 @Queryable
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class EntityExample {
+@NoArgsConstructor
+public class Bar {
 
-    private String abc;
-    private String def;
-    private Bar bar;
-    private String test;
-    private Integer value;
-
+    private String str;
 }

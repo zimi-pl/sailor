@@ -1,4 +1,4 @@
-package pl.zimi.repository;
+package pl.zimi.repository.query;
 
 import pl.zimi.repository.annotation.Descriptor;
 

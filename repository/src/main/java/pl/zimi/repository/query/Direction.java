@@ -1,4 +1,4 @@
-package pl.zimi.repository;
+package pl.zimi.repository.query;
 
 public enum Direction {
     NATURAL(1), REVERSE(-1);

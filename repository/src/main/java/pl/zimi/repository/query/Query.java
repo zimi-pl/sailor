@@ -1,4 +1,4 @@
-package pl.zimi.repository;
+package pl.zimi.repository.query;
 
 import lombok.Builder;
 import lombok.Value;

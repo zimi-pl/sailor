@@ -1,8 +1,8 @@
 package pl.zimi.repository.contract;
 
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import pl.zimi.repository.example.Foo;
+import pl.zimi.repository.example.SFoo;
 
 class ContractVerificatorTest {
 

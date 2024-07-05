@@ -1,4 +1,4 @@
-package pl.zimi.repository;
+package pl.zimi.repository.manipulation;
 
 public class Value implements Comparable {
 

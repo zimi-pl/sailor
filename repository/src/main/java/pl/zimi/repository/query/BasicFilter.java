@@ -1,5 +1,7 @@
-package pl.zimi.repository;
+package pl.zimi.repository.query;
 
+import pl.zimi.repository.manipulation.Manipulator;
+import pl.zimi.repository.manipulation.Value;
 import pl.zimi.repository.annotation.Descriptor;
 
 import java.util.Objects;

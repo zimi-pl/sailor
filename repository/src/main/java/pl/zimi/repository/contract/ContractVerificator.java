@@ -1,9 +1,11 @@
 package pl.zimi.repository.contract;
 
-import pl.zimi.repository.Sorters;
-import pl.zimi.repository.*;
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.annotation.TypedDescriptor;
+import pl.zimi.repository.example.Foo;
+import pl.zimi.repository.example.SFoo;
+import pl.zimi.repository.manipulation.Manipulator;
+import pl.zimi.repository.query.*;
 
 import java.util.*;
 import java.util.function.Function;

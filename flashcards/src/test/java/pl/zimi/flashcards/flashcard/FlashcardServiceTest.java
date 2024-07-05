@@ -2,11 +2,10 @@ package pl.zimi.flashcards.flashcard;
 
 import org.junit.jupiter.api.Test;
 import pl.zimi.flashcards.user.UserFixture;
-import pl.zimi.repository.Filters;
-import pl.zimi.repository.Queries;
-import pl.zimi.repository.Repository;
-import pl.zimi.repository.contract.Contract;
+import pl.zimi.repository.query.Repository;
 import pl.zimi.repository.contract.MemoryPort;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,7 +24,7 @@ class FlashcardServiceTest {
         var returned = flashcardService.next(saved.getUserId());
 
         // then
-        assertEquals(saved, returned);
+        assertEquals(saved, returned.get());
     }
 
     @Test
@@ -41,7 +40,7 @@ class FlashcardServiceTest {
         var returned = flashcardService.next(UserFixture.someUserId());
 
         // then
-        assertNull(returned);
+        assertEquals(Optional.empty(), returned);
     }
 
     @Test
@@ -65,7 +64,7 @@ class FlashcardServiceTest {
         var returned = flashcardService.next(better.getUserId());
 
         // then
-        assertEquals(worseSaved, returned);
+        assertEquals(worseSaved, returned.get());
     }
 
     @Test
@@ -114,6 +113,48 @@ class FlashcardServiceTest {
         // then
         assertEquals(AnswerResult.mistake(), returned);
         assertEquals(MemorizationLevel.none(), flashcardRepository.findById(saved.id).get().getMemorizationLevel());
+    }
+
+    @Test
+    void shouldFailOnMissingFlashcardIdInAnswer() {
+        // given
+        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+
+        final var answer = Answer.builder()
+                .flashcardId("missing-id")
+                .translation("bad answer")
+                .build();
+
+        // when
+        var returned = flashcardService.answer(answer);
+
+        // then
+        assertEquals(AnswerResult.failure(), returned);
+    }
+
+    @Test
+    void shouldNotShowNextMessageWhenMemorizationLevelIsNotExceeded() {
+        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+
+        var flashcard = FlashcardFixture.someFlashcardBuilder()
+                .memorizationLevel(MemorizationLevel.level(5))
+                .build();
+
+        final var saved = flashcardService.add(flashcard);
+
+        final var answer = Answer.builder()
+                .flashcardId(saved.getId())
+                .translation("bad answer")
+                .build();
+        var returned = flashcardService.answer(answer);
+
+        // when
+        final var next = flashcardService.next(saved.getUserId());
+
+        // then
+        assertEquals(Optional.empty(), next);
     }
 
 }

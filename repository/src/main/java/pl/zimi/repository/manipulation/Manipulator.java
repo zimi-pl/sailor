@@ -1,4 +1,4 @@
-package pl.zimi.repository;
+package pl.zimi.repository.manipulation;
 
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.annotation.TypedDescriptor;

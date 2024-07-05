@@ -1,8 +1,7 @@
-package pl.zimi.repository;
+package pl.zimi.repository.query;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 public interface Repository<T> {
 

@@ -1,9 +1,13 @@
-package pl.zimi.repository;
+package pl.zimi.repository.manipulation;
 
 import com.google.gson.Gson;
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.contract.OptimisticLockException;
+import pl.zimi.repository.query.Filters;
+import pl.zimi.repository.query.Queries;
+import pl.zimi.repository.query.Query;
+import pl.zimi.repository.query.Repository;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

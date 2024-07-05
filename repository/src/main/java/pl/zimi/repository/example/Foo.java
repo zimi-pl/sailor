@@ -1,4 +1,4 @@
-package pl.zimi.repository.contract;
+package pl.zimi.repository.example;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
