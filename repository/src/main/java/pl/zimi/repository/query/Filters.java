@@ -26,4 +26,8 @@ public class Filters {
     public static Filter regex(final Descriptor descriptor, final String pattern) {
         return new BasicFilter(descriptor, pattern, Operator.REGEX);
     }
+
+    public static Filter isNull(final Descriptor descriptor) {
+        return new BasicFilter(descriptor, null, Operator.IS_NULL);
+    }
 }

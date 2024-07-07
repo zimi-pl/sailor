@@ -33,6 +33,9 @@ class BasicFilter implements Filter {
 
     @Override
     public String describe() {
+        if (getOperator() == Operator.IS_NULL) {
+            return getPath() + " " + getOperator();
+        }
         return getPath() + " " + getOperator() + " " + getExpectedValue();
     }
 
@@ -49,6 +52,8 @@ class BasicFilter implements Filter {
                     return isGreaterThan(computedValue.getObject());
                 case REGEX:
                     return computedValue.getObject() != null && Pattern.compile((String)expectedValue).matcher((String)computedValue.getObject()).find();
+                case IS_NULL:
+                    return computedValue.getObject() == null;
                 default:
                     throw new IllegalArgumentException("Unknown operator " + operator);
             }

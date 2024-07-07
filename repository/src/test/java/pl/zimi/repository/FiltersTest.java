@@ -6,6 +6,8 @@ import pl.zimi.repository.example.Foo;
 import pl.zimi.repository.example.SFoo;
 import pl.zimi.repository.query.*;
 
+import java.time.Instant;
+
 public class FiltersTest {
 
     @Test
@@ -72,4 +74,34 @@ public class FiltersTest {
         Assertions.assertEquals("abc NATURAL", asc.describe());
     }
 
+    @Test
+    void ltInstantWithNull() {
+        final var dateString = "2024-07-07T07:31:52Z";
+        final var instant = Instant.parse(dateString);
+        final Filter filter = Filters.lt(SFoo.foo.date, instant);
+
+        final Foo foo = Foo.builder().abc(null).build();
+        Assertions.assertFalse(filter.test(foo));
+        Assertions.assertEquals("date LOWER_THAN " + dateString, filter.describe());
+    }
+
+    @Test
+    void gtInstantWithNull() {
+        final var dateString = "2024-07-07T07:31:52Z";
+        final var instant = Instant.parse(dateString);
+        final Filter filter = Filters.gt(SFoo.foo.date, instant);
+
+        final Foo foo = Foo.builder().abc(null).build();
+        Assertions.assertFalse(filter.test(foo));
+        Assertions.assertEquals("date GREATER_THAN " + dateString, filter.describe());
+    }
+
+    @Test
+    void isNull() {
+        final Filter filter = Filters.isNull(SFoo.foo.abc);
+
+        final Foo foo = Foo.builder().abc(null).build();
+        Assertions.assertTrue(filter.test(foo));
+        Assertions.assertEquals("abc IS_NULL", filter.describe());
+    }
 }

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pl.zimi.repository.annotation.Queryable;
 
+import java.time.Instant;
+
 @Queryable
 @Data
 @Builder
@@ -21,5 +23,6 @@ public class Foo {
     private Integer value;
     private Integer seq;
     private Integer version;
+    private Instant date;
 
 }

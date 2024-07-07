@@ -10,7 +10,7 @@ public class FlashcardScenarios {
 
     Flashcard addFlashcard() {
         var flashcard = FlashcardFixture.someFlashcardBuilder()
-                .memorizationLevel(MemorizationLevel.level(5))
+                .memorizationLevel(MemorizationLevel.level(0))
                 .build();
 
         return flashcardService.add(flashcard);

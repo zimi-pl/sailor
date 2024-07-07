@@ -43,15 +43,18 @@ public class ClockManipulator {
         return clock;
     }
 
-    public void addMinutes(int amount) {
+    public ClockManipulator addMinutes(int amount) {
         currentTime = currentTime.plus(amount, ChronoUnit.MINUTES);
+        return this;
     }
 
-    public void addHours(int amount) {
+    public ClockManipulator addHours(int amount) {
         currentTime = currentTime.plus(amount, ChronoUnit.HOURS);
+        return this;
     }
 
-    public void addSeconds(int amount) {
+    public ClockManipulator addSeconds(int amount) {
         currentTime = currentTime.plus(amount, ChronoUnit.SECONDS);
+        return this;
     }
 }

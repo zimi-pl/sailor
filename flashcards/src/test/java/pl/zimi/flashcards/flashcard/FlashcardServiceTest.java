@@ -8,6 +8,7 @@ import pl.zimi.repository.contract.MemoryPort;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FlashcardServiceTest {
 
@@ -92,7 +93,8 @@ class FlashcardServiceTest {
 
         // then
         assertEquals(AnswerResult.correct(), returned);
-        assertEquals(MemorizationLevel.level(1), flashcardRepository.findById(saved.id).get().getMemorizationLevel());
+        final var upgraded = flashcardRepository.findById(saved.id).get();
+        assertEquals(1, upgraded.getMemorizationLevel().getNumberOfSuccesses());
     }
 
     @Test
@@ -156,7 +158,50 @@ class FlashcardServiceTest {
         final var next = flashcardService.next(flashcard.getUserId());
 
         // then
-        assertEquals(Optional.empty(), next);
+        assertTrue(next.isEmpty());
+    }
+
+    @Test
+    void shouldShowNextMessageWhenMemorizationLevelIsExceeded() {
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+
+        final var flashcard = flashcardScenarios.addFlashcard();
+        flashcardScenarios.answerCorrectly(flashcard);
+
+        clockManipulator.addMinutes(5).addSeconds(1);
+
+        // when
+        final var next = flashcardService.next(flashcard.getUserId());
+
+        // then
+        assertTrue(next.isPresent());
+        assertEquals(next.get().getId(), flashcard.getId() );
+    }
+
+    @Test
+    void shouldUseIncreasePeriodAfterConsecutiveSuccesses() {
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+
+        final var flashcard = flashcardScenarios.addFlashcard();
+        flashcardScenarios.answerCorrectly(flashcard);
+        clockManipulator.addMinutes(6);
+
+        flashcardScenarios.answerCorrectly(flashcard);
+        clockManipulator.addMinutes(6);
+
+        // when
+        final var next = flashcardService.next(flashcard.getUserId());
+
+        // then
+        assertTrue(next.isEmpty());
     }
 
 }
