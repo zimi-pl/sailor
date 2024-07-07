@@ -1,21 +1,22 @@
 package pl.zimi.flashcards.flashcard;
 
 import org.junit.jupiter.api.Test;
+import pl.zimi.clock.ClockManipulator;
 import pl.zimi.flashcards.user.UserFixture;
-import pl.zimi.repository.query.Repository;
 import pl.zimi.repository.contract.MemoryPort;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FlashcardServiceTest {
 
     @Test
     void shouldReturnNext() {
         // given
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
         var flashcard = FlashcardFixture.someFlashcard();
 
         var saved = flashcardService.add(flashcard);
@@ -30,8 +31,9 @@ class FlashcardServiceTest {
     @Test
     void shouldReturnNullForOtherUser() {
         // given
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
         var flashcard = FlashcardFixture.someFlashcard();
 
         var saved = flashcardService.add(flashcard);
@@ -46,8 +48,9 @@ class FlashcardServiceTest {
     @Test
     void shouldReturnFlashcardWhichHasLowerMemorizationLevel() {
         // given
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
         var better = FlashcardFixture.someFlashcardBuilder()
                 .memorizationLevel(MemorizationLevel.level(1))
                 .build();
@@ -70,8 +73,9 @@ class FlashcardServiceTest {
     @Test
     void shouldUpgradeMemorizationLevelAfterCorrectAnswer() {
         // given
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
         var flashcard = FlashcardFixture.someFlashcardBuilder()
                 .memorizationLevel(MemorizationLevel.none())
                 .build();
@@ -94,8 +98,9 @@ class FlashcardServiceTest {
     @Test
     void shouldDowngradeMemorizationLevelAfterWrongAnswer() {
         // given
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
         var flashcard = FlashcardFixture.someFlashcardBuilder()
                 .memorizationLevel(MemorizationLevel.level(5))
                 .build();
@@ -118,8 +123,9 @@ class FlashcardServiceTest {
     @Test
     void shouldFailOnMissingFlashcardIdInAnswer() {
         // given
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
 
         final var answer = Answer.builder()
                 .flashcardId("missing-id")
@@ -135,23 +141,19 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotShowNextMessageWhenMemorizationLevelIsNotExceeded() {
-        Repository<Flashcard> flashcardRepository = MemoryPort.port(FlashcardContract.CONTRACT);
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository);
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
 
-        var flashcard = FlashcardFixture.someFlashcardBuilder()
-                .memorizationLevel(MemorizationLevel.level(5))
-                .build();
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
 
-        final var saved = flashcardService.add(flashcard);
+        final var flashcard = flashcardScenarios.addFlashcard();
+        flashcardScenarios.answerCorrectly(flashcard);
 
-        final var answer = Answer.builder()
-                .flashcardId(saved.getId())
-                .translation("bad answer")
-                .build();
-        var returned = flashcardService.answer(answer);
+        clockManipulator.addMinutes(2);
 
         // when
-        final var next = flashcardService.next(saved.getUserId());
+        final var next = flashcardService.next(flashcard.getUserId());
 
         // then
         assertEquals(Optional.empty(), next);

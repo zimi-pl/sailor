@@ -7,7 +7,7 @@ import java.lang.reflect.Proxy;
 
 public class ProxyProvider {
 
-    public static <T, U> T provide(Class<T> interfaceToProxy, Repository<U> portedContract) {
+    public static <T> T provide(Class<T> interfaceToProxy, Repository portedContract) {
         InvocationHandler handler = new SimpleInvocationHandler<>(portedContract);
         return (T) Proxy.newProxyInstance(interfaceToProxy.getClassLoader(),
                 new Class[] { interfaceToProxy },

@@ -12,7 +12,7 @@ import java.time.Instant;
 public class StudentMain {
 
     public static void main(String[] args) {
-        Repository<Student> studentRepository = MemoryPort.port(new Contract<>(Student.class));
+        Repository<Student> studentRepository = MemoryPort.port(StudentRepository.class);
 
         studentRepository.save(new Student("1", "John", "Doe", Instant.parse("2000-01-01T15:00:00Z")));
         studentRepository.save(new Student("2", "Jane", "Smith", Instant.parse("2003-01-01T15:00:00Z")));

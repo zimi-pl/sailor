@@ -3,12 +3,15 @@ package pl.zimi.flashcards.flashcard;
 import lombok.RequiredArgsConstructor;
 import pl.zimi.repository.query.*;
 
+import java.time.Clock;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 public class FlashcardService {
 
     final Repository<Flashcard> flashcardRepository;
+
+    final Clock clock;
 
     Optional<Flashcard> next(UserId userId) {
         final var filter = Filters.eq(SFlashcard.flashcard.userId, userId);
