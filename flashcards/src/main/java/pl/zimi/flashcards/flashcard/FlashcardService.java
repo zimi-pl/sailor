@@ -26,7 +26,13 @@ public class FlashcardService {
         return found.isEmpty() ? Optional.empty() : Optional.of(found.get(0));
     }
 
-    public Flashcard add(Flashcard flashcard) {
+    public Flashcard add(AddFlashcardRequest request) {
+        final var flashcard = Flashcard.builder()
+                .userId(request.getUserId())
+                .word(request.getWord())
+                .translation(request.getTranslation())
+                .memorizationLevel(MemorizationLevel.none())
+                .build();
         return flashcardRepository.save(flashcard);
     }
 
@@ -42,7 +48,7 @@ public class FlashcardService {
             flashcardRepository.save(flashcard);
             return AnswerResult.correct();
         } else {
-            flashcard.setMemorizationLevel(MemorizationLevel.none());
+            flashcard.memorizationLevel.downgrade(clock.instant(), memorizationStrategy);
             flashcardRepository.save(flashcard);
             return AnswerResult.mistake();
         }

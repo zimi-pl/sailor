@@ -5,6 +5,7 @@ import pl.zimi.clock.ClockManipulator;
 import pl.zimi.flashcards.user.UserFixture;
 import pl.zimi.repository.contract.MemoryPort;
 
+import java.time.Clock;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,9 +19,8 @@ class FlashcardServiceTest {
         FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
         ClockManipulator clockManipulator = ClockManipulator.managable();
         FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-        var flashcard = FlashcardFixture.someFlashcard();
 
-        var saved = flashcardService.add(flashcard);
+        var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
         // when
         var returned = flashcardService.next(saved.getUserId());
@@ -35,9 +35,8 @@ class FlashcardServiceTest {
         FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
         ClockManipulator clockManipulator = ClockManipulator.managable();
         FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-        var flashcard = FlashcardFixture.someFlashcard();
 
-        var saved = flashcardService.add(flashcard);
+        var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
         // when
         var returned = flashcardService.next(UserFixture.someUserId());
@@ -52,23 +51,22 @@ class FlashcardServiceTest {
         FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
         ClockManipulator clockManipulator = ClockManipulator.managable();
         FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-        var better = FlashcardFixture.someFlashcardBuilder()
-                .memorizationLevel(MemorizationLevel.level(1))
-                .build();
 
-        var worse = FlashcardFixture.someFlashcardBuilder()
-                .memorizationLevel(MemorizationLevel.none())
-                .userId(better.getUserId())
-                .build();
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
 
-        flashcardService.add(better);
-        var worseSaved = flashcardService.add(worse);
+        final var better = flashcardScenarios.addFlashcard();
+
+        flashcardScenarios.answerCorrectly(better);
+
+        final var worse = flashcardScenarios.addFlashcardForSameUser(better);
+
+        clockManipulator.addMinutes(6);
 
         // when
         var returned = flashcardService.next(better.getUserId());
 
         // then
-        assertEquals(worseSaved, returned.get());
+        assertEquals(worse, returned.get());
     }
 
     @Test
@@ -77,11 +75,8 @@ class FlashcardServiceTest {
         FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
         ClockManipulator clockManipulator = ClockManipulator.managable();
         FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-        var flashcard = FlashcardFixture.someFlashcardBuilder()
-                .memorizationLevel(MemorizationLevel.none())
-                .build();
 
-        final var saved = flashcardService.add(flashcard);
+        final var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
         final var answer = Answer.builder()
                 .flashcardId(saved.getId())
@@ -107,19 +102,17 @@ class FlashcardServiceTest {
                 .memorizationLevel(MemorizationLevel.level(5))
                 .build();
 
-        final var saved = flashcardService.add(flashcard);
+        final var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
-        final var answer = Answer.builder()
-                .flashcardId(saved.getId())
-                .translation("bad answer")
-                .build();
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        flashcardScenarios.answerCorrectly(saved);
 
         // when
-        var returned = flashcardService.answer(answer);
+        var returned = flashcardScenarios.answerBadly(saved);
 
         // then
         assertEquals(AnswerResult.mistake(), returned);
-        assertEquals(MemorizationLevel.none(), flashcardRepository.findById(saved.id).get().getMemorizationLevel());
+        assertEquals(0, flashcardRepository.findById(saved.id).get().getMemorizationLevel().getNumberOfSuccesses());
     }
 
     @Test
@@ -202,6 +195,54 @@ class FlashcardServiceTest {
 
         // then
         assertTrue(next.isEmpty());
+    }
+
+    @Test
+    void shouldWaitBeforeNextShowAfterFailure() {
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+
+        final var flashcard = flashcardScenarios.addFlashcard();
+
+        flashcardScenarios.answerBadly(flashcard);
+        clockManipulator.addMinutes(4);
+
+        // when
+        final var next = flashcardService.next(flashcard.getUserId());
+
+        // then
+        assertTrue(next.isEmpty());
+    }
+
+    @Test
+    void shouldCountViewsAndSuccesses() {
+        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
+        ClockManipulator clockManipulator = ClockManipulator.managable();
+        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+
+        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+
+        final var flashcard = flashcardScenarios.addFlashcard();
+
+        flashcardScenarios.answerCorrectly(flashcard);
+        clockManipulator.addMinutes(6);
+
+        flashcardScenarios.answerCorrectly(flashcard);
+        clockManipulator.addMinutes(11);
+
+        flashcardScenarios.answerBadly(flashcard);
+        clockManipulator.addMinutes(6);
+
+        flashcardScenarios.answerCorrectly(flashcard);
+        // when
+        final var next = flashcardRepository.findById(flashcard.getId()).get();
+
+        // then
+        assertEquals(4, next.getMemorizationLevel().getNumberOfAnswers());
+        assertEquals(1, next.getMemorizationLevel().getNumberOfSuccesses());
     }
 
 }
