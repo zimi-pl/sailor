@@ -5,7 +5,6 @@ import pl.zimi.clock.ClockManipulator;
 import pl.zimi.flashcards.user.UserFixture;
 import pl.zimi.repository.contract.MemoryPort;
 
-import java.time.Clock;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
