@@ -1,4 +1,4 @@
-package pl.zimi.flashcards.flashcard;
+package pl.zimi.flashcards.user;
 
 import lombok.Value;
 

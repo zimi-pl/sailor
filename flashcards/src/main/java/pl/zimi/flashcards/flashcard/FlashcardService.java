@@ -2,6 +2,7 @@ package pl.zimi.flashcards.flashcard;
 
 import lombok.RequiredArgsConstructor;
 import pl.zimi.flashcards.strategy.ExpotentialMemorizationStrategy;
+import pl.zimi.flashcards.user.UserId;
 import pl.zimi.repository.query.*;
 
 import java.time.Clock;

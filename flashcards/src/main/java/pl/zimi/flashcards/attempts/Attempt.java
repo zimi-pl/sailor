@@ -1,5 +1,7 @@
 package pl.zimi.flashcards.attempts;
 
+import pl.zimi.flashcards.flashcard.Confidence;
+
 import java.time.Instant;
 
 public class Attempt {

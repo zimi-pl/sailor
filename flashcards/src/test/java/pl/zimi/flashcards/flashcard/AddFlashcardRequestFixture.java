@@ -1,6 +1,7 @@
 package pl.zimi.flashcards.flashcard;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import pl.zimi.flashcards.user.UserId;
 
 public class AddFlashcardRequestFixture {
 

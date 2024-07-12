@@ -9,5 +9,6 @@ public class Answer {
 
     String flashcardId;
     String translation;
+    Confidence confidence;
 
 }

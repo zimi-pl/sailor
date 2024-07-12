@@ -1,4 +1,4 @@
-package pl.zimi.flashcards.phrases;
+package pl.zimi.flashcards.user;
 
 import lombok.Builder;
 import lombok.Value;

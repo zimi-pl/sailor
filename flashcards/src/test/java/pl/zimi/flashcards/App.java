@@ -17,4 +17,12 @@ public class App {
                 .register(FlashcardRepository.class, MemoryPort.port(FlashcardRepository.class));
     }
 
+    public static Context createIntegrationApp() {
+        final var clockManipulator = ClockManipulator.managable();
+        return Context.create()
+                .register(ClockManipulator.class, clockManipulator)
+                .register(Clock.class, clockManipulator.getClock())
+                .register(FlashcardRepository.class, MemoryPort.port(FlashcardRepository.class));
+    }
+
 }

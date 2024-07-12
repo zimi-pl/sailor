@@ -1,4 +1,4 @@
-package pl.zimi.flashcards.phrases;
+package pl.zimi.flashcards.user;
 
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.query.Repository;
