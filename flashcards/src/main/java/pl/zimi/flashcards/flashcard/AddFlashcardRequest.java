@@ -11,8 +11,8 @@ public class AddFlashcardRequest {
     @NonNull
     UserId userId;
     @NonNull
-    String word;
+    Word original;
     @NonNull
-    String translation;
+    Word translation;
 
 }

@@ -7,10 +7,7 @@ import pl.zimi.repository.annotation.Queryable;
 @Data
 @Builder
 @Queryable
-public class Flashcard {
-    String id;
-    UserId userId;
-    Word original;
-    Word translation;
-    MemorizationLevel memorizationLevel;
+public class Word {
+    private String text;
+    private String context;
 }

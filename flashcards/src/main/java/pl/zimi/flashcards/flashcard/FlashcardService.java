@@ -29,7 +29,7 @@ public class FlashcardService {
     public Flashcard add(AddFlashcardRequest request) {
         final var flashcard = Flashcard.builder()
                 .userId(request.getUserId())
-                .word(request.getWord())
+                .original(request.getOriginal())
                 .translation(request.getTranslation())
                 .memorizationLevel(MemorizationLevel.none())
                 .build();
@@ -43,7 +43,7 @@ public class FlashcardService {
             return AnswerResult.failure();
         }
         final var flashcard = flashcards.get();
-        if (flashcard.getTranslation().equals(answer.getTranslation())) {
+        if (flashcard.getTranslation().getText().equals(answer.getTranslation())) {
             flashcard.memorizationLevel.upgrade(clock.instant(), memorizationStrategy);
             flashcardRepository.save(flashcard);
             return AnswerResult.correct();

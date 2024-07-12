@@ -72,16 +72,12 @@ class FlashcardServiceTest {
         final var app = App.createApp();
         FlashcardService flashcardService = app.getBean(FlashcardService.class);
         FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
 
-        final var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
-
-        final var answer = Answer.builder()
-                .flashcardId(saved.getId())
-                .translation(saved.getTranslation())
-                .build();
+        final var saved = flashcardScenarios.addFlashcard();
 
         // when
-        var returned = flashcardService.answer(answer);
+        final var returned = flashcardScenarios.answerCorrectly(saved);
 
         // then
         assertEquals(AnswerResult.correct(), returned);

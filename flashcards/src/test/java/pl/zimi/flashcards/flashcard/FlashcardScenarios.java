@@ -25,7 +25,7 @@ public class FlashcardScenarios {
     AnswerResult answerCorrectly(Flashcard flashcard) {
         final var answer = Answer.builder()
                 .flashcardId(flashcard.getId())
-                .translation(flashcard.getTranslation())
+                .translation(flashcard.getTranslation().getText())
                 .build();
         return flashcardService.answer(answer);
     }

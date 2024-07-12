@@ -11,8 +11,8 @@ public class FlashcardFixture {
 
     public static Flashcard.FlashcardBuilder someFlashcardBuilder() {
         return Flashcard.builder()
-                .word(RandomStringUtils.randomAlphabetic(10))
-                .translation(RandomStringUtils.randomAlphabetic(10))
+                .original(WordFixture.someWord())
+                .translation(WordFixture.someWord())
                 .memorizationLevel(MemorizationLevel.none())
                 .userId(UserId.of(RandomStringUtils.randomAlphabetic(10)));
     }
