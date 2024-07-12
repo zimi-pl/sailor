@@ -10,7 +10,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FlashcardService {
 
-    final Repository<Flashcard> flashcardRepository;
+    final FlashcardRepository flashcardRepository;
 
     final Clock clock;
 

@@ -2,8 +2,8 @@ package pl.zimi.flashcards.flashcard;
 
 import org.junit.jupiter.api.Test;
 import pl.zimi.clock.ClockManipulator;
+import pl.zimi.flashcards.App;
 import pl.zimi.flashcards.user.UserFixture;
-import pl.zimi.repository.contract.MemoryPort;
 
 import java.util.Optional;
 
@@ -15,9 +15,8 @@ class FlashcardServiceTest {
     @Test
     void shouldReturnNext() {
         // given
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
 
         var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
@@ -31,9 +30,8 @@ class FlashcardServiceTest {
     @Test
     void shouldReturnNullForOtherUser() {
         // given
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
 
         var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
@@ -47,11 +45,10 @@ class FlashcardServiceTest {
     @Test
     void shouldReturnFlashcardWhichHasLowerMemorizationLevel() {
         // given
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
 
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var flashcardScenarios = app.getBean(FlashcardScenarios.class);
 
         final var better = flashcardScenarios.addFlashcard();
 
@@ -59,6 +56,7 @@ class FlashcardServiceTest {
 
         final var worse = flashcardScenarios.addFlashcardForSameUser(better);
 
+        final var clockManipulator = app.getBean(ClockManipulator.class);
         clockManipulator.addMinutes(6);
 
         // when
@@ -71,9 +69,9 @@ class FlashcardServiceTest {
     @Test
     void shouldUpgradeMemorizationLevelAfterCorrectAnswer() {
         // given
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
 
         final var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
 
@@ -94,16 +92,12 @@ class FlashcardServiceTest {
     @Test
     void shouldDowngradeMemorizationLevelAfterWrongAnswer() {
         // given
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-        var flashcard = FlashcardFixture.someFlashcardBuilder()
-                .memorizationLevel(MemorizationLevel.level(5))
-                .build();
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+        FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
 
-        final var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
-
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var saved = flashcardScenarios.addFlashcard();
         flashcardScenarios.answerCorrectly(saved);
 
         // when
@@ -117,9 +111,8 @@ class FlashcardServiceTest {
     @Test
     void shouldFailOnMissingFlashcardIdInAnswer() {
         // given
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
 
         final var answer = Answer.builder()
                 .flashcardId("missing-id")
@@ -135,11 +128,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldNotShowNextMessageWhenMemorizationLevelIsNotExceeded() {
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+        ClockManipulator clockManipulator = app.getBean(ClockManipulator.class);
 
         final var flashcard = flashcardScenarios.addFlashcard();
         flashcardScenarios.answerCorrectly(flashcard);
@@ -155,11 +147,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldShowNextMessageWhenMemorizationLevelIsExceeded() {
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+        ClockManipulator clockManipulator = app.getBean(ClockManipulator.class);
 
         final var flashcard = flashcardScenarios.addFlashcard();
         flashcardScenarios.answerCorrectly(flashcard);
@@ -176,11 +167,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldUseIncreasePeriodAfterConsecutiveSuccesses() {
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+        ClockManipulator clockManipulator = app.getBean(ClockManipulator.class);
 
         final var flashcard = flashcardScenarios.addFlashcard();
         flashcardScenarios.answerCorrectly(flashcard);
@@ -198,11 +188,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldWaitBeforeNextShowAfterFailure() {
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var app = App.createApp();
+        FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+        ClockManipulator clockManipulator = app.getBean(ClockManipulator.class);
 
         final var flashcard = flashcardScenarios.addFlashcard();
 
@@ -218,11 +207,10 @@ class FlashcardServiceTest {
 
     @Test
     void shouldCountViewsAndSuccesses() {
-        FlashcardRepository flashcardRepository = MemoryPort.port(FlashcardRepository.class);
-        ClockManipulator clockManipulator = ClockManipulator.managable();
-        FlashcardService flashcardService = new FlashcardService(flashcardRepository, clockManipulator.getClock());
-
-        final var flashcardScenarios = new FlashcardScenarios(flashcardService);
+        final var app = App.createApp();
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+        ClockManipulator clockManipulator = app.getBean(ClockManipulator.class);
+        FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
 
         final var flashcard = flashcardScenarios.addFlashcard();
 

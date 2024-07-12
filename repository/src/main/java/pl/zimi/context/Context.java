@@ -1,6 +1,5 @@
 package pl.zimi.context;
 
-import java.time.Clock;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +19,6 @@ public class Context {
         }
         try {
             final var constructor = clazz.getDeclaredConstructors()[0];
-            System.out.println(constructor.getParameterCount());
             final var parameters = Arrays.stream(constructor.getParameterTypes()).map(this::getBean).collect(Collectors.toList()).toArray();
             final var t = (T) constructor.newInstance(parameters);
             beans.put(t.getClass(), t);
@@ -30,7 +28,8 @@ public class Context {
         }
     }
 
-    public void register(Class clazz, Object object) {
+    public Context register(Class clazz, Object object) {
         beans.put(clazz, object);
+        return this;
     }
 }
