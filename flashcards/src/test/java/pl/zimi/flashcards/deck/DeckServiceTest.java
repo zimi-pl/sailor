@@ -13,7 +13,6 @@ import pl.zimi.repository.query.Queries;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 
 class DeckServiceTest {
@@ -40,4 +39,22 @@ class DeckServiceTest {
         Assertions.assertEquals(new HashSet<>(Arrays.asList("Here", "are", "few", "words", "about", "animals", "Are", "they", "important", "in", "our", "lives")), words);
     }
 
+    @Test
+    void shouldRemoveDuplicatesDuringDeckCreation() {
+        // given
+        final var app = App.createApp();
+        final var deckService = app.getBean(DeckService.class);
+
+        Content content = new Content("Some article", "My favourite color is yellow. I have yellow socks and yellow t-shirt.");
+
+        // when
+        final var deck = deckService.createDeck(content, UserId.of("abc"));
+
+        // then
+        Assertions.assertEquals(content.getTitle(), deck.getName());
+        Assertions.assertNotNull(deck.getId());
+        final var flashcardRepository = app.getBean(FlashcardRepository.class);
+        final var flashcards = flashcardRepository.find(Queries.filter(Filters.eq(SFlashcard.flashcard.deckId, deck.getId())));
+        Assertions.assertEquals(10, flashcards.size());
+    }
 }

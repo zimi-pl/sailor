@@ -5,7 +5,7 @@ import pl.zimi.flashcards.flashcard.*;
 import pl.zimi.flashcards.translator.Translator;
 import pl.zimi.flashcards.user.UserId;
 
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class DeckService {
@@ -22,6 +22,7 @@ public class DeckService {
         final var saved = deckRepository.save(deck);
 
         final var sentences = contentDeckCreator.splitSentences(content);
+        TreeSet<AddFlashcardRequest> requests = new TreeSet<>(Comparator.comparing(this::to));
         for (String sentence : sentences) {
             List<Phrase> phrases = contentDeckCreator.splitPhrases(sentence);
             for (Phrase phrase : phrases) {
@@ -32,10 +33,17 @@ public class DeckService {
                         .userId(userId)
                         .deckId(saved.getId())
                         .build();
-                flashcardService.add(addFlashcardRequest);
+                requests.add(addFlashcardRequest);
             }
         }
+        for (AddFlashcardRequest request : requests) {
+            flashcardService.add(request);
+        }
         return saved;
+    }
+
+    String to(AddFlashcardRequest request) {
+        return request.getOriginal().getText() + ":" + request.getTranslation().getText();
     }
 
 }
