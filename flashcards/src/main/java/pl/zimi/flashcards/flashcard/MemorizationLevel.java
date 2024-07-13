@@ -21,7 +21,7 @@ public class MemorizationLevel {
 
     Instant useAfter;
 
-    static MemorizationLevel none() {
+    public static MemorizationLevel none() {
         return MemorizationLevel.builder().numberOfSuccesses(0).numberOfAnswers(0).build();
     }
 

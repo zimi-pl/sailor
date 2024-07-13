@@ -57,7 +57,7 @@ public class ContractVerificator {
             tests.add(new Test("findByIdFailsForMissingIdContract", () -> findByIdFailsForMissingIdContract(supplier.apply(contract))));
         } else {
             tests.add(new Test("existingIdContract", () -> existingIdContract(supplier.apply(contract), contract.getEntityClass())));
-            tests.add(new Test("idStringContract", () -> idStringContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
+            tests.add(new Test("idContract", () -> idContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("idStringContractNextValue", () -> idStringContractNextValue(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("delete", () -> delete(repository, contract.getEntityClass(), distinctDescriptor)));
             tests.add(new Test("findByIdWorksForExistingIdContract", () -> findByIdWorksForExistingIdContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
@@ -468,7 +468,7 @@ public class ContractVerificator {
         assertEquals("bar.str REVERSE", comparator.describe());
     }
 
-    public static <T> void idStringContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
+    public static <T> void idContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
         final var entity = Manipulator.noArgConstructor(clazz);
         assertEquals(null, Manipulator.get(entity, idDescriptor).getObject());
         final var saved = repository.save(entity);

@@ -8,4 +8,8 @@ public class TypedDescriptor<T> extends Descriptor {
         super(parent, path);
         this.type = type;
     }
+
+    public Class<T> getType() {
+        return type;
+    }
 }

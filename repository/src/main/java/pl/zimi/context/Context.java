@@ -18,13 +18,17 @@ public class Context {
             return (T)beans.get(clazz);
         }
         try {
-            final var constructor = clazz.getDeclaredConstructors()[0];
-            final var parameters = Arrays.stream(constructor.getParameterTypes()).map(this::getBean).collect(Collectors.toList()).toArray();
+            final var constructor = clazz.getConstructors()[0];
+            final var parameters = Arrays.stream(constructor.getParameterTypes())
+                    .map(this::getBean)
+                    .collect(Collectors.toList())
+                    .toArray();
             final var t = (T) constructor.newInstance(parameters);
             beans.put(t.getClass(), t);
             return t;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            String message = "Trouble with preparing bean: " + clazz.getName();
+            throw new RuntimeException(message, e);
         }
     }
 

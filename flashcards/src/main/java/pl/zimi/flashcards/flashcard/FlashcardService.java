@@ -33,6 +33,7 @@ public class FlashcardService {
                 .original(request.getOriginal())
                 .translation(request.getTranslation())
                 .memorizationLevel(MemorizationLevel.none())
+                .deckId(request.getDeckId())
                 .build();
         return flashcardRepository.save(flashcard);
     }

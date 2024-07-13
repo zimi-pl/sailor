@@ -2,6 +2,7 @@ package pl.zimi.repository.manipulation;
 
 import com.google.gson.Gson;
 import pl.zimi.repository.annotation.Descriptor;
+import pl.zimi.repository.annotation.TypedDescriptor;
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.contract.OptimisticLockException;
 import pl.zimi.repository.query.Filters;
@@ -36,7 +37,18 @@ public class MemoryRepository<T> implements Repository<T> {
     public T save(T entity) {
         final T copied = deepCopy(entity);
         if (contract.getId() != null && Manipulator.get(copied, contract.getId()).getObject() == null) {
-            Manipulator.set(copied, contract.getId(), Integer.toString(idCounter.getAndIncrement()));
+            final var newId = Integer.toString(idCounter.getAndIncrement());
+            if (contract.getId() instanceof TypedDescriptor && !((TypedDescriptor)contract.getId()).getType().equals(String.class)) {
+                final Object id;
+                try {
+                    id = ((TypedDescriptor) contract.getId()).getType().getConstructor(String.class).newInstance(newId);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                Manipulator.set(copied, contract.getId(), id);
+            } else {
+                Manipulator.set(copied, contract.getId(), newId);
+            }
             if (versionDescriptor != null) {
                 Manipulator.set(copied, versionDescriptor, 0);
             }

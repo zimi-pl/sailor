@@ -110,7 +110,13 @@ class ContractVerificatorTest {
 
     @Test
     void idStringContract() {
-        ContractVerificator.idStringContract(MemoryPort.port(contract), Foo.class, SFoo.foo.id);
+        ContractVerificator.idContract(MemoryPort.port(contract), Foo.class, SFoo.foo.id);
+    }
+
+    @Test
+    void idClassContract() {
+        Contract<Foo> localContract = Contract.repository(Foo.class).id(SFoo.foo.bar);
+        ContractVerificator.idContract(MemoryPort.port(localContract), Foo.class, SFoo.foo.bar);
     }
 
     @Test

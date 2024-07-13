@@ -4,13 +4,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 public class WordFixture {
 
-    public static Word someWord() {
+    public static Phrase someWord() {
         return someWordBuilder()
                 .build();
     }
 
-    public static Word.WordBuilder someWordBuilder() {
-        return Word.builder()
+    public static Phrase.PhraseBuilder someWordBuilder() {
+        return Phrase.builder()
                 .text(RandomStringUtils.randomAlphabetic(10))
                 .context(RandomStringUtils.randomAlphabetic(10));
     }

@@ -2,6 +2,7 @@ package pl.zimi.flashcards.flashcard;
 
 import lombok.Builder;
 import lombok.Data;
+import pl.zimi.flashcards.deck.DeckId;
 import pl.zimi.flashcards.user.UserId;
 import pl.zimi.repository.annotation.Queryable;
 
@@ -11,7 +12,8 @@ import pl.zimi.repository.annotation.Queryable;
 public class Flashcard {
     String id;
     UserId userId;
-    Word original;
-    Word translation;
+    Phrase original;
+    Phrase translation;
+    DeckId deckId;
     MemorizationLevel memorizationLevel;
 }
