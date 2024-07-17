@@ -15,7 +15,7 @@ public class FlashcardService {
 
     final Clock clock;
 
-    public Optional<Flashcard> next(UserId userId) {
+    public Optional<Question> next(UserId userId) {
         final var userFilter = Filters.eq(SFlashcard.flashcard.userId, userId);
         final var useAfterFilter = Filters.lt(SFlashcard.flashcard.memorizationLevel.useAfter, clock.instant());
         final var useAfterIsNullFilter = Filters.isNull(SFlashcard.flashcard.memorizationLevel.useAfter);
@@ -24,7 +24,7 @@ public class FlashcardService {
         final var sorter = Sorters.asc(SFlashcard.flashcard.memorizationLevel.numberOfSuccesses);
         final var query = Queries.query(filter, sorter, new LimitOffset(1L, 0L));
         final var found = flashcardRepository.find(query);
-        return found.isEmpty() ? Optional.empty() : Optional.of(found.get(0));
+        return found.stream().findFirst().map(flashcard -> Question.builder().flashcardId(flashcard.getId()).original(flashcard.getOriginal()).build());
     }
 
     public Flashcard add(AddFlashcardRequest request) {

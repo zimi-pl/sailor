@@ -16,6 +16,7 @@ public class Endpoint {
     HttpMethod method;
     String path;
     Function handler;
+    Scheme scheme;
     List<Mapping> mappings;
     Class requestClass;
 
