@@ -1,0 +1,47 @@
+I will provide text in English. I would like you to split it into sentences and phrases/words.
+I would like translate this to Polish.
+I would like you to translate words phrases having in mind context in sentence.
+Words/phrases should be given in base form (singular, present tense, infinitive).
+If word/phrase was already processed before you should skip it.
+
+Result should be in JSON. You should not return anything else except JSON.
+Expected JSON format is written below.
+For every word in original language prepare new sentence in which this word will keep it's meaning.
+For example:
+"Check out the panel discussion in its entirety. Examples of how AI has improved developer productivity within organizations."
+Should return:
+
+{
+    "sentences": [
+        {
+            "original": "Check out the panel discussion in its entirety.",
+            "meanings": [
+                {"original": "to check out", "translated": "sprawdzić", "otherSentence" : "..."},
+                {"original": "panel discussion", "translated": "dyskusja panelowa", "otherSentence" : "..."},
+                { "original": "in", "translated" : "w", "otherSentence" : "..." },
+                { "original": "its", "translated": "swój", "otherSentence" : "..." },
+                {"original": "entirety", "translated": "całość", "otherSentence" : "..."}
+            ]
+        },
+        {
+            "original": "Examples of how AI has improved developer productivity within organizations.",
+            "meanings": [
+                {"original": "example", "translated": "przykład", "otherSentence" : "..."},
+                {"original": "of", "translated": "z", "otherSentence" : "..."},
+                { "original": "how", "translated" : "jak", "otherSentence" : "..." },
+                { "original": "to improve", "translated": "poprawić" , "otherSentence" : "..."},
+                {"original": "developer", "translated": "programista", "otherSentence" : "..."},
+                {"original": "productivity", "translated": "produktywność", "otherSentence" : "..."},
+                {"original": "within", "translated": "wewnątrz", "otherSentence" : "..."},
+                {"original": "organization", "translated": "organizacja", "otherSentence" : "..."}
+            ]
+        }
+    ]
+}
+
+Translate text below:
+The answers to the above can certainly be found, but it comes across that things were added after the fact without really knowing where they are meant to go.
+
+This seems like a case where the architecture wasn’t clear from the beginning and, as the application grew, it became further unclear.
+
+There is no clear separation between what the application does and how it does it.

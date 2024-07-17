@@ -1,4 +1,5 @@
 I will provide you a pair of word and proposed translation.
+I would like translate this to Polish.
 Could you provide sentence which tries to reflects proposed meaning?
 I will provide it in format:
 {

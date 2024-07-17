@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+
+    implementation 'org.projectlombok:lombok:1.18.18'
+
+    implementation 'org.slf4j:slf4j-simple:2.0.10'
+
+    implementation 'io.javalin:javalin:6.1.6'
+
+    implementation project(":annotation")
+    annotationProcessor project(":annotation")
+
+    implementation project(':repository')
+    implementation project(':flashcards')
+
+    implementation project(':sailor-javalin')
+
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    testImplementation 'org.apache.commons:commons-lang3:3.14.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'org.example'
+            artifactId 'repository'
+            version '1.0-SNAPSHOT'
+
+            from components.java
+        }
+    }
+}

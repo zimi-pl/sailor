@@ -4,4 +4,5 @@ include 'repository'
 include 'examples'
 include 'flashcards'
 include 'flashcards-main'
+include 'sailor-javalin'
 

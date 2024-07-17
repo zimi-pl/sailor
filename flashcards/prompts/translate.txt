@@ -1,4 +1,5 @@
 I will provide text in English. I would like you to split it into sentences and phrases/words.
+I would like translate this to Polish.
 I would like you to translate words phrases having in mind context in sentence.
 Words/phrases should be given in base form (singular, present tense, infinitive).
 

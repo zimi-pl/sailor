@@ -1,15 +1,5 @@
 # Project exclude paths
 /.gradle/
-/annotation/build/
-/annotation/out/
-/annotation/out/production/classes/
-/repository/build/
-/repository/out/
-/repository/out/production/classes/
-/repository/out/test/classes/
-/testing/build/
-/testing/out/
-/testing/out/production/classes/
-/testing/out/test/classes/
-/testing/src/main/generated/
+/*/build/**
+/*/out/**
 /.idea/

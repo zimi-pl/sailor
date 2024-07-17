@@ -1,0 +1,28 @@
+### Add flashcard
+POST http://localhost:7070/flashcard/add
+Content-Type: application/json
+
+{
+  "userId": {
+    "value": "asdfa"
+  },
+  "original": {
+    "text": "cat",
+    "context": "This is my cat."
+  },
+  "translation": {
+    "text": "kot",
+    "context": "To jest mój kot."
+  },
+  "deckId": {
+    "value": "talia"
+  }
+}
+
+### show next flashcard
+POST http://localhost:7070/flashcard/next
+Content-Type: application/json
+
+{
+  "value": "asdfa"
+}

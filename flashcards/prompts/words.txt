@@ -1,4 +1,5 @@
 I will provide you a text in English.
+I would like translate this to Polish.
 I would like you to split it into words/phrases.
 For each word I would like you to translate it into word in Polish which reflects meaning in sentence.
 In case there is the same word with same translation - skip it and not return in response.
