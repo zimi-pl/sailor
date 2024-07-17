@@ -22,10 +22,10 @@ dependencies {
     implementation project(":annotation")
     annotationProcessor project(":annotation")
 
-    implementation project(':repository')
+    implementation project(':common')
     implementation project(':flashcards')
 
-    implementation project(':sailor-javalin')
+    implementation project(':http-javalin')
 
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'

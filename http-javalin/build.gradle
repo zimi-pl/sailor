@@ -23,7 +23,7 @@ dependencies {
     implementation project(":annotation")
     annotationProcessor project(":annotation")
 
-    implementation project(':repository')
+    implementation project(':common')
     implementation project(':flashcards')
 
     compileOnly 'org.projectlombok:lombok:1.18.20'

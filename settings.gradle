@@ -1,8 +1,8 @@
 rootProject.name = 'sailor'
 include 'annotation'
-include 'repository'
+include 'common'
 include 'examples'
 include 'flashcards'
 include 'flashcards-main'
-include 'sailor-javalin'
+include 'http-javalin'
 
