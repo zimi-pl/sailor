@@ -15,7 +15,7 @@ public class FlashcardService {
 
     final Clock clock;
 
-    Optional<Flashcard> next(UserId userId) {
+    public Optional<Flashcard> next(UserId userId) {
         final var userFilter = Filters.eq(SFlashcard.flashcard.userId, userId);
         final var useAfterFilter = Filters.lt(SFlashcard.flashcard.memorizationLevel.useAfter, clock.instant());
         final var useAfterIsNullFilter = Filters.isNull(SFlashcard.flashcard.memorizationLevel.useAfter);

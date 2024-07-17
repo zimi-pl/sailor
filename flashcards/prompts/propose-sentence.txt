@@ -1,0 +1,21 @@
+I will provide you a pair of word and proposed translation.
+Could you provide sentence which tries to reflects proposed meaning?
+I will provide it in format:
+{
+    "1": {"original": "cat", "translated": "kot"},
+    "2": {"original": "dog", "translated": "pies"},
+    "3": {"original": "to improve", "translated": "ulepszać"}
+}
+As a response I would expect something like below:
+{
+    "1": "This is my cat.",
+    "2": "Dogs have four paws",
+    "3": "I'm trying to improve my code everyday."
+}
+Sentences should be in English.
+Here are words:
+{
+    "1": {"original": "cat", "translated": "kot"},
+    "2": {"original": "dog", "translated": "pies"},
+    "3": {"original": "to improve", "translated": "ulepszać"}
+}

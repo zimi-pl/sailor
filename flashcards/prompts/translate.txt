@@ -1,0 +1,45 @@
+I will provide text in English. I would like you to split it into sentences and phrases/words.
+I would like you to translate words phrases having in mind context in sentence.
+Words/phrases should be given in base form (singular, present tense, infinitive).
+
+Result should be in JSON. You should not return anything else except JSON.
+Expected JSON format is written below.
+For example:
+"Check out the panel discussion in its entirety. Examples of how AI has improved developer productivity within organizations."
+Should return:
+{
+    "sentences": [
+        {
+            "original": "Check out the panel discussion in its entirety.",
+            "translated": "Zapoznaj się z całą dyskusją panelową",
+            "meanings": [
+                {"original": "to check out", "translated": "sprawdzić"},
+                {"original": "panel discussion", "translated": "dyskusja panelowa"},
+                { "original": "in", "translated" : "w" },
+                { "original": "its", "translated": "swój" },
+                {"original": "entirety", "translated": "całość"}
+            ]
+        },
+        {
+            "original": "Examples of how AI has improved developer productivity within organizations.",
+            "translated": "Przykłady, jak sztuczna inteligencja poprawiła produktywność programistów w organizacjach.",
+            "meanings": [
+                {"original": "example", "translated": "przykład"},
+                {"original": "of", "translated": "z"},
+                { "original": "how", "translated" : "jak" },
+                { "original": "to improve", "translated": "poprawić" },
+                {"original": "developer", "translated": "programista"},
+                {"original": "productivity", "translated": "produktywność"},
+                {"original": "within", "translated": "wewnątrz"},
+                {"original": "organization", "translated": "organizacja"}
+            ]
+        }
+    ]
+}
+
+Translate this text:
+The answers to the above can certainly be found, but it comes across that things were added after the fact without really knowing where they are meant to go.
+
+This seems like a case where the architecture wasn’t clear from the beginning and, as the application grew, it became further unclear.
+
+There is no clear separation between what the application does and how it does it.

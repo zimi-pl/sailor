@@ -1,0 +1,32 @@
+I will provide you a text in English.
+I would like you to split it into words/phrases.
+For each word I would like you to translate it into word in Polish which reflects meaning in sentence.
+In case there is the same word with same translation - skip it and not return in response.
+I would like this words be in base form present tense, singular (and so on).
+Response should be in JSON. Do not return anything else except this JSON.
+Expected format is below.
+For text like this:
+"Check out the panel discussion in its entirety. Examples of how AI has improved developer productivity within organizations."
+You should return
+[
+    {"original": "to check out", "translated": "sprawdzić"},
+    {"original": "panel discussion", "translated": "dyskusja panelowa"},
+    {"original": "in", "translated" : "w" },
+    {"original": "its", "translated": "swój" },
+    {"original": "entirety", "translated": "całość"}
+    {"original": "example", "translated": "przykład"},
+    {"original": "of", "translated": "z"},
+    {"original": "how", "translated" : "jak" },
+    {"original": "to improve", "translated": "poprawić" },
+    {"original": "developer", "translated": "programista"},
+    {"original": "productivity", "translated": "produktywność"},
+    {"original": "within", "translated": "wewnątrz"},
+    {"original": "organization", "translated": "organizacja"}
+]
+
+Please translate following:
+The answers to the above can certainly be found, but it comes across that things were added after the fact without really knowing where they are meant to go.
+
+This seems like a case where the architecture wasn’t clear from the beginning and, as the application grew, it became further unclear.
+
+There is no clear separation between what the application does and how it does it.
