@@ -1,4 +1,4 @@
-rootProject.name = 'repository'
+rootProject.name = 'sailor'
 include 'annotation'
 include 'repository'
 include 'examples'
