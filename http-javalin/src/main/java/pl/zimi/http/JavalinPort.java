@@ -8,15 +8,13 @@ import io.javalin.http.HandlerType;
 import java.util.List;
 
 public class JavalinPort {
-
     private Javalin javalin;
-
-    public JavalinPort(Javalin javalin) {
+    private JavalinPort(Javalin javalin) {
         this.javalin = javalin;
     }
 
     public JavalinPort setupService(Object service) {
-        List<Endpoint> endpoints = Server.prepareEndpoints(service);
+        List<Endpoint> endpoints = EndpointsBuilder.prepareEndpoints(service);
         for (Endpoint endpoint : endpoints) {
             setupEndpoint(endpoint);
         }
@@ -27,7 +25,7 @@ public class JavalinPort {
         System.out.println(endpoint);
         Handler handler = ctx -> {
             Request request = new JavalinRequest(ctx);
-            String json = endpoint.scheme.handle(endpoint, request);
+            String json = endpoint.getScheme().handle(endpoint, request);
             ctx.contentType(ContentType.APPLICATION_JSON).result(json);
         };
         javalin.addHttpHandler(prepareHandlerType(endpoint), endpoint.getPath(), handler);

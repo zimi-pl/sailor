@@ -13,12 +13,12 @@ import java.util.function.Function;
 @Getter
 @ToString
 public class Endpoint {
-    HttpMethod method;
-    String path;
-    Function handler;
-    Scheme scheme;
-    List<Mapping> mappings;
-    Class requestClass;
+    private HttpMethod method;
+    private String path;
+    private Function handler;
+    private Scheme scheme;
+    private List<Mapping> mappings;
+    private Class requestClass;
 
     public static EndpointBuilder get() {
         return builder().method(HttpMethod.GET);

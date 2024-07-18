@@ -24,7 +24,7 @@ class FlashcardServiceTest {
         var returned = flashcardService.next(saved.getUserId());
 
         // then
-        assertEquals(saved, returned.get());
+        assertEquals(new Question(saved.getId(), saved.getOriginal()), returned.get());
     }
 
     @Test
@@ -63,7 +63,7 @@ class FlashcardServiceTest {
         var returned = flashcardService.next(better.getUserId());
 
         // then
-        assertEquals(worse, returned.get());
+        assertEquals(new Question(worse.getId(), worse.getOriginal()), returned.get());
     }
 
     @Test
@@ -158,7 +158,7 @@ class FlashcardServiceTest {
 
         // then
         assertTrue(next.isPresent());
-        assertEquals(next.get().getId(), flashcard.getId() );
+        assertEquals(next.get().getFlashcardId(), flashcard.getId());
     }
 
     @Test
