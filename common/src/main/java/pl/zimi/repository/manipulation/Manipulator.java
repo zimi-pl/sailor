@@ -3,6 +3,7 @@ package pl.zimi.repository.manipulation;
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.annotation.TypedDescriptor;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 
@@ -54,6 +55,14 @@ public class Manipulator {
         }
     }
 
+    public static <T, R> T singleArgConstructor(final Class<T> source, final R argValue) {
+        try {
+            return source.getConstructor(argValue.getClass()).newInstance(argValue);
+        } catch (final NoSuchMethodException|IllegalAccessException|InstantiationException|InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static <T> Class type(final Class<T> clazz, final Descriptor descriptor) {
         Class startClazz = clazz;
         try {
@@ -70,5 +79,10 @@ public class Manipulator {
     public static <T> TypedValue<T> getValue(final Object source, TypedDescriptor<T> descriptor) {
         final var value = get(source, descriptor);
         return new TypedValue<>((T)value.getObject(), value.getFailureReason());
+    }
+
+    public static Class<?> detectSingleArgumentClass(Class<?> requestClass) {
+        Constructor<?> declaredConstructor = requestClass.getDeclaredConstructors()[0];
+        return declaredConstructor.getParameterTypes()[0];
     }
 }

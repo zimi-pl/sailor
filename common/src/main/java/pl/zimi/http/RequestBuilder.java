@@ -4,6 +4,7 @@ public class RequestBuilder {
 
     private HttpMethod httpMethod;
     private String path;
+    private String body;
 
     private RequestBuilder(HttpMethod httpMethod, String path) {
         this.httpMethod = httpMethod;
@@ -14,7 +15,12 @@ public class RequestBuilder {
         return new RequestBuilder(HttpMethod.GET, path);
     }
 
+    public RequestBuilder body(String body) {
+        this.body = body;
+        return this;
+    }
+
     public Request build() {
-        return new RequestImpl(httpMethod, path);
+        return new Request(httpMethod, path, body);
     }
 }

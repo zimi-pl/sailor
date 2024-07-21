@@ -10,15 +10,20 @@ import java.util.function.Supplier;
 public class ServerVerificator {
 
     public static void assertThese(final Supplier<Server> serverSupplier) {
-        Server server = serverSupplier.get();
-        for (final Test single : test(server)) {
+        for (final Test single : test(serverSupplier)) {
             single.runnable.run();
         }
     }
 
-    private static List<Test> test(final Server server) {
+    private static List<Test> test(final Supplier<Server> serverSupplier) {
         final var list = Arrays.asList(
-                new Test("get", () -> get(server))
+                new Test("getNoArg", () -> getNoArg(serverSupplier.get())),
+                new Test("getId", () -> getId(serverSupplier.get())),
+                new Test("getIdObject", () -> getIdObject(serverSupplier.get())),
+                new Test("getIdLong", () -> getIdLong(serverSupplier.get())),
+                new Test("getIdLongInObject", () -> getIdLongInObject(serverSupplier.get())),
+                new Test("getIdInteger", () -> getIdInteger(serverSupplier.get())),
+                new Test("getIdIntegerInObject", () -> getIdIntegerInObject(serverSupplier.get()))
         );
         final var tests = new ArrayList<>(list);
 
@@ -44,19 +49,21 @@ public class ServerVerificator {
     static class Some {
         String a;
         String b;
+        Long c;
 
-        public Some(String a, String b) {
+        public Some(String a, String b, Long c) {
             this.a = a;
             this.b = b;
+            this.c = c;
         }
     }
 
-    public static <T> void get(final Server server) {
+    public static <T> void getNoArg(final Server server) {
         // given
         Endpoint endpoint = Endpoint.get()
                 .path("/")
                 .requestClass(Void.class)
-                .handler(v -> new Some("a", "b"))
+                .handler(v -> new Some("a", "b", 0L))
                 .scheme(new NoArgScheme())
                 .build();
 
@@ -68,10 +75,173 @@ public class ServerVerificator {
         Response response = server.handleRequest(request);
 
         // then
-        JsonParser parser = new JsonParser();
-        JsonElement expected = parser.parse("{'a' : 'a', 'b' : 'b'}");
+        JsonElement expected = JsonParser.parseString("{'a' : 'a', 'b' : 'b', 'c': 0}");
         assertEquals(expected, response.json());
+    }
 
+    public static <T> void getId(final Server server) {
+        // given
+        Endpoint endpoint = Endpoint.get()
+                .path("/some/{id}")
+                .requestClass(String.class)
+                .handler(v -> new Some((String)v, "b", 0L))
+                .scheme(new IdScheme())
+                .build();
+
+        server.setupEndpoint(endpoint);
+
+        Request request = RequestBuilder.get("/some/hello").build();
+
+        // when
+        Response response = server.handleRequest(request);
+
+        // then
+        JsonElement expected = JsonParser.parseString("{'a' : 'hello', 'b' : 'b', 'c': 0}");
+        assertEquals(expected, response.json());
+    }
+
+    public static class UserId {
+        String value;
+
+        public UserId(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public static <T> void getIdObject(final Server server) {
+        // given
+
+
+        Endpoint endpoint = Endpoint.get()
+                .path("/some/{id}")
+                .requestClass(UserId.class)
+                .handler(v -> new Some(((UserId)v).getValue(), "b", 0L))
+                .scheme(new IdScheme())
+                .build();
+
+        server.setupEndpoint(endpoint);
+
+        Request request = RequestBuilder.get("/some/hello").build();
+
+        // when
+        Response response = server.handleRequest(request);
+
+        // then
+        JsonElement expected = JsonParser.parseString("{'a' : 'hello', 'b' : 'b', 'c': 0}");
+        assertEquals(expected, response.json());
+    }
+
+    public static <T> void getIdLong(final Server server) {
+        // given
+        Endpoint endpoint = Endpoint.get()
+                .path("/some/{id}")
+                .requestClass(Long.class)
+                .handler(v -> new Some("a", "b", (Long)v))
+                .scheme(new IdScheme())
+                .build();
+
+        server.setupEndpoint(endpoint);
+
+        Request request = RequestBuilder.get("/some/10").build();
+
+        // when
+        Response response = server.handleRequest(request);
+
+        // then
+        JsonElement expected = JsonParser.parseString("{'a' : 'a', 'b' : 'b', 'c': 10}");
+        assertEquals(expected, response.json());
+    }
+
+    public static class UserLongId {
+        Long value;
+
+        public UserLongId(Long value) {
+            this.value = value;
+        }
+
+        public Long getValue() {
+            return value;
+        }
+    }
+
+    public static <T> void getIdLongInObject(final Server server) {
+        // given
+        Endpoint endpoint = Endpoint.get()
+                .path("/some/{id}")
+                .requestClass(UserLongId.class)
+                .handler(v -> new Some("a", "b", ((UserLongId)v).getValue()))
+                .scheme(new IdScheme())
+                .build();
+
+        server.setupEndpoint(endpoint);
+
+        Request request = RequestBuilder.get("/some/10").build();
+
+        // when
+        Response response = server.handleRequest(request);
+
+        // then
+        JsonElement expected = JsonParser.parseString("{'a' : 'a', 'b' : 'b', 'c': 10}");
+        assertEquals(expected, response.json());
+    }
+
+
+    public static <T> void getIdInteger(final Server server) {
+        // given
+        Endpoint endpoint = Endpoint.get()
+                .path("/some/{id}")
+                .requestClass(Long.class)
+                .handler(v -> new Some("a", "b", (Long)v))
+                .scheme(new IdScheme())
+                .build();
+
+        server.setupEndpoint(endpoint);
+
+        Request request = RequestBuilder.get("/some/10").build();
+
+        // when
+        Response response = server.handleRequest(request);
+
+        // then
+        JsonElement expected = JsonParser.parseString("{'a' : 'a', 'b' : 'b', 'c': 10}");
+        assertEquals(expected, response.json());
+    }
+
+    public static class UserIntegerId {
+        Integer value;
+
+        public UserIntegerId(Integer value) {
+            this.value = value;
+        }
+
+        public Integer getValue() {
+            return value;
+        }
+    }
+
+    public static <T> void getIdIntegerInObject(final Server server) {
+        // given
+        Endpoint endpoint = Endpoint.get()
+                .path("/some/{id}")
+                .requestClass(UserIntegerId.class)
+                .handler(v -> new Some("a", "b", ((UserIntegerId)v).getValue().longValue()))
+                .scheme(new IdScheme())
+                .build();
+
+        server.setupEndpoint(endpoint);
+
+        Request request = RequestBuilder.get("/some/10").build();
+
+        // when
+        Response response = server.handleRequest(request);
+
+        // then
+        JsonElement expected = JsonParser.parseString("{'a' : 'a', 'b' : 'b', 'c': 10}");
+        assertEquals(expected, response.json());
     }
 
     private static <T> T assertThrows(final Class<T> clazz, final Executable executable) {

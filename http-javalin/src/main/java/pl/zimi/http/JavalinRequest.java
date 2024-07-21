@@ -2,12 +2,17 @@ package pl.zimi.http;
 
 import io.javalin.http.Context;
 
-public class JavalinRequest implements Request {
+public class JavalinRequest implements RequestDecoder {
 
     private final Context ctx;
 
     JavalinRequest(Context ctx) {
         this.ctx = ctx;
+    }
+
+    @Override
+    public String fullPath() {
+        return null;
     }
 
     @Override

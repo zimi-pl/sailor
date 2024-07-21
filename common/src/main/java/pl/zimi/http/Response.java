@@ -12,6 +12,6 @@ public class Response {
     }
 
     public JsonElement json() {
-        return new JsonParser().parse(body);
+        return JsonParser.parseString(body);
     }
 }

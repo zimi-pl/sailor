@@ -24,7 +24,7 @@ public class JavalinPort {
     public JavalinPort setupEndpoint(Endpoint endpoint) {
         System.out.println(endpoint);
         Handler handler = ctx -> {
-            Request request = new JavalinRequest(ctx);
+            RequestDecoder request = new JavalinRequest(ctx);
             String json = endpoint.getScheme().handle(endpoint, request);
             ctx.contentType(ContentType.APPLICATION_JSON).result(json);
         };

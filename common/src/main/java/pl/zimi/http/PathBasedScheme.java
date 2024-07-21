@@ -7,7 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class PathBasedScheme implements Scheme {
     @Override
-    public String handle(Endpoint endpoint, Request request) {
+    public String handle(Endpoint endpoint, RequestDecoder request) {
         try {
             Gson gson = new Gson();
             Object requestArgument = endpoint.getRequestClass().getDeclaredConstructor().newInstance();

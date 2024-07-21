@@ -5,7 +5,7 @@ import pl.zimi.repository.manipulation.Manipulator;
 
 public class PostBodyScheme implements Scheme {
     @Override
-    public String handle(Endpoint endpoint, Request request) {
+    public String handle(Endpoint endpoint, RequestDecoder request) {
         Gson gson = new Gson();
         Object requestArgument = gson.fromJson(request.body(), endpoint.getRequestClass());
         if (endpoint.getMappings() != null) {
