@@ -23,14 +23,6 @@ public interface HttpClient {
         return null;
     }
 
-    public class ProxyProvider {
 
-        public static <T> T provide(Class<T> interfaceToProxy, Repository portedContract) {
-            InvocationHandler handler = new SimpleInvocationHandler<>(portedContract);
-            return (T) Proxy.newProxyInstance(interfaceToProxy.getClassLoader(),
-                    new Class[] { interfaceToProxy },
-                    handler);
-        }
-    }
 
 }

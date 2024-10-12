@@ -14,4 +14,8 @@ public class Response {
     public JsonElement json() {
         return JsonParser.parseString(body);
     }
+
+    public String body() {
+        return body;
+    }
 }

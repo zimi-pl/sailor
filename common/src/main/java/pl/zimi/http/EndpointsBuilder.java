@@ -18,8 +18,7 @@ public class EndpointsBuilder {
     }
 
     private static List<Endpoint> prepareEndpoints(Object service, Class<?> serviceClass) {
-        String servicePart = serviceClass.getSimpleName().replace("Service", "");
-        String path = servicePart.substring(0, 1).toLowerCase() + servicePart.substring(1);
+        String path = preparePath(serviceClass);
         Method[] methods = serviceClass.getDeclaredMethods();
         List<Endpoint> endpoints = new ArrayList<>();
         for (Method method : methods) {
@@ -29,7 +28,13 @@ public class EndpointsBuilder {
         return endpoints;
     }
 
-    private static Endpoint prepareEndpoint(Object service, Method method, String path) {
+    public static String preparePath(Class<?> serviceClass) {
+        String servicePart = serviceClass.getSimpleName().replace("Service", "");
+        String path = servicePart.substring(0, 1).toLowerCase() + servicePart.substring(1);
+        return path;
+    }
+
+    public static Endpoint prepareEndpoint(Object service, Method method, String path) {
         Function invoke = wrapMethod(service, method);
         if ("find".equals(method.getName()) || "get".equals(method.getName())) {
             return Endpoint.get()
