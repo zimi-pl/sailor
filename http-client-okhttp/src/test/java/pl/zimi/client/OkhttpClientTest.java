@@ -32,7 +32,7 @@ public class OkhttpClientTest {
         // given
         stubFor(get(urlEqualTo("/some/7")).willReturn(aResponse().withBody("{\"id\": \"7\"}")));
 
-        SomeService someService = OkhttpClient.client(SomeService.class, wmRuntimeInfo.getHttpBaseUrl());
+        SomeService someService = ServiceClientBuilder.client(SomeService.class, wmRuntimeInfo.getHttpBaseUrl(), new OkhttpClient());
 
         // when
         Dto dto = someService.get("7");
@@ -48,7 +48,7 @@ public class OkhttpClientTest {
                 .withRequestBody(equalToJson("{\"test\":  \"value\"}"))
                 .willReturn(aResponse().withBody("{\"id\": \"value\"}")));
 
-        SomeService someService = OkhttpClient.client(SomeService.class, wmRuntimeInfo.getHttpBaseUrl());
+        SomeService someService = ServiceClientBuilder.client(SomeService.class, wmRuntimeInfo.getHttpBaseUrl(), new OkhttpClient());
         Some some = new Some();
         some.test = "value";
 
