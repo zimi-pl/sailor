@@ -1,4 +1,6 @@
-package pl.zimi.http;
+package pl.zimi.client;
+
+import pl.zimi.http.HttpMethod;
 
 public class Request {
 

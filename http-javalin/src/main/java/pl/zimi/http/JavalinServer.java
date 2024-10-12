@@ -4,24 +4,18 @@ import io.javalin.Javalin;
 import io.javalin.http.ContentType;
 import io.javalin.http.Handler;
 import io.javalin.http.HandlerType;
+import pl.zimi.client.HttpClient;
+import pl.zimi.client.Request;
+import pl.zimi.client.Response;
 
-import java.util.List;
-
-public class JavalinPort {
+public class JavalinServer implements Server<Javalin>, HttpClient {
     private Javalin javalin;
-    private JavalinPort(Javalin javalin) {
+    private JavalinServer(Javalin javalin) {
         this.javalin = javalin;
     }
 
-    public JavalinPort setupService(Object service) {
-        List<Endpoint> endpoints = EndpointsBuilder.prepareEndpoints(service);
-        for (Endpoint endpoint : endpoints) {
-            setupEndpoint(endpoint);
-        }
-        return this;
-    }
-
-    public JavalinPort setupEndpoint(Endpoint endpoint) {
+    @Override
+    public JavalinServer setupEndpoint(Endpoint endpoint) {
         System.out.println(endpoint);
         Handler handler = ctx -> {
             RequestDecoder request = new JavalinRequest(ctx);
@@ -46,7 +40,17 @@ public class JavalinPort {
         return javalin;
     }
 
-    public static JavalinPort server() {
-        return new JavalinPort(Javalin.create());
+    @Override
+    public void start() {
+        javalin.start(7070);
+    }
+
+    @Override
+    public Response handleRequest(Request request) {
+        return null;
+    }
+
+    public static JavalinServer server() {
+        return new JavalinServer(Javalin.create());
     }
 }

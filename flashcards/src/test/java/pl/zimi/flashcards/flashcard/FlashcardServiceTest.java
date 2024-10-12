@@ -17,8 +17,9 @@ class FlashcardServiceTest {
         // given
         final var app = App.createApp();
         FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
 
-        var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
+        var saved = flashcardScenarios.addFlashcard();
 
         // when
         var returned = flashcardService.next(saved.getUserId());
@@ -32,8 +33,9 @@ class FlashcardServiceTest {
         // given
         final var app = App.createApp();
         FlashcardService flashcardService = app.getBean(FlashcardService.class);
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
 
-        var saved = flashcardService.add(AddFlashcardRequestFixture.someAddFlashcardRequest());
+        flashcardScenarios.addFlashcard();
 
         // when
         var returned = flashcardService.next(UserFixture.someUserId());
@@ -70,7 +72,6 @@ class FlashcardServiceTest {
     void shouldUpgradeMemorizationLevelAfterCorrectAnswer() {
         // given
         final var app = App.createApp();
-        FlashcardService flashcardService = app.getBean(FlashcardService.class);
         FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
         FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
 
@@ -89,7 +90,6 @@ class FlashcardServiceTest {
     void shouldDowngradeMemorizationLevelAfterWrongAnswer() {
         // given
         final var app = App.createApp();
-        FlashcardService flashcardService = app.getBean(FlashcardService.class);
         FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
         FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
 

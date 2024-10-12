@@ -1,4 +1,4 @@
-package pl.zimi.http;
+package pl.zimi.client;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;

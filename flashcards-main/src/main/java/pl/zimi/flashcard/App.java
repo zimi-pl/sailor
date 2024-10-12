@@ -3,12 +3,12 @@ package pl.zimi.flashcard;
 import pl.zimi.context.Context;
 import pl.zimi.flashcards.flashcard.FlashcardRepository;
 import pl.zimi.flashcards.flashcard.FlashcardService;
-import pl.zimi.http.JavalinPort;
+import pl.zimi.http.JavalinServer;
 import pl.zimi.repository.contract.MemoryPort;
 
 import java.time.Clock;
 
-public class Server {
+public class App {
 
     public static void main(String[] args) {
 
@@ -26,7 +26,7 @@ public class Server {
 //                .handler(o -> someService.add((SomeRequest) o))
 //                .build();
 
-        JavalinPort.server()
+        JavalinServer.server()
 //                .setupEndpoint(endpoint)
                 .setupService(flashcardService)
                 .prepare()

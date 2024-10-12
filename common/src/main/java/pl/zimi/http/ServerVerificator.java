@@ -2,6 +2,10 @@ package pl.zimi.http;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import pl.zimi.client.HttpClient;
+import pl.zimi.client.Request;
+import pl.zimi.client.RequestBuilder;
+import pl.zimi.client.Response;
 import pl.zimi.repository.contract.Executable;
 
 import java.util.*;
@@ -114,8 +118,6 @@ public class ServerVerificator {
 
     public static <T> void getIdObject(final Server server) {
         // given
-
-
         Endpoint endpoint = Endpoint.get()
                 .path("/some/{id}")
                 .requestClass(UserId.class)

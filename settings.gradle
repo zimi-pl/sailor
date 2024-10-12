@@ -5,4 +5,5 @@ include 'examples'
 include 'flashcards'
 include 'flashcards-main'
 include 'http-javalin'
+include 'http-client-okhttp'
 

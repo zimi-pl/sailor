@@ -2,6 +2,9 @@ package pl.zimi.http;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import pl.zimi.client.HttpClient;
+import pl.zimi.client.Request;
+import pl.zimi.client.Response;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +13,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FakeServer implements Server {
+public class FakeServer implements Server, HttpClient {
 
     private final Map<String, EndpointData> endpoints = new HashMap<>();
 
@@ -62,6 +65,15 @@ public class FakeServer implements Server {
 
         String body = endpoint.getScheme().handle(endpoint, fakeRequestDecoder);
         return new Response(body);
+    }
+
+    @Override
+    public Object prepare() {
+        return null;
+    }
+
+    @Override
+    public void start() {
     }
 
     private EndpointData route(Request request) {

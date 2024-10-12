@@ -10,6 +10,14 @@ public class EndpointsBuilder {
 
     public static List<Endpoint> prepareEndpoints(Object service) {
         Class<?> serviceClass = service.getClass();
+        return prepareEndpoints(service, serviceClass);
+    }
+
+    public static List<Endpoint> prepareEndpoints(Class<?> serviceClass) {
+        return prepareEndpoints(null, serviceClass);
+    }
+
+    private static List<Endpoint> prepareEndpoints(Object service, Class<?> serviceClass) {
         String servicePart = serviceClass.getSimpleName().replace("Service", "");
         String path = servicePart.substring(0, 1).toLowerCase() + servicePart.substring(1);
         Method[] methods = serviceClass.getDeclaredMethods();

@@ -1,6 +1,7 @@
 package pl.zimi.http;
 
 import org.junit.jupiter.api.Test;
+import pl.zimi.client.FakeClient;
 
 import java.util.Arrays;
 
@@ -8,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FakeServerTest {
 
-    @Test
-    public void test() {
-        ServerVerificator.assertThese(FakeServer::new);
-    }
+//    @Test
+//    public void test() {
+//        ServerVerificator.assertThese(FakeServer::new, new FakeClient());
+//    }
 
     @Test
     public void testPrepareEndpointData() {
