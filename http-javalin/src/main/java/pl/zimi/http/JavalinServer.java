@@ -50,6 +50,11 @@ public class JavalinServer implements Server<Javalin>, HttpClient {
         return null;
     }
 
+    @Override
+    public String baseUrl() {
+        return "http://localhost:7070";
+    }
+
     public static JavalinServer server() {
         return new JavalinServer(Javalin.create());
     }

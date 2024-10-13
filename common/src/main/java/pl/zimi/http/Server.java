@@ -24,5 +24,7 @@ public interface Server<T> {
     @Deprecated
     Response handleRequest(Request request);
 
+    String baseUrl();
+
 
 }

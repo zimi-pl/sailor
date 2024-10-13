@@ -1,4 +1,4 @@
-package pl.zimi.example.simple;
+package pl.zimi.example.simple.clean;
 
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.query.Repository;

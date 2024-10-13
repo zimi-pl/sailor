@@ -29,7 +29,7 @@ public class FakeHttp implements Server, HttpClient {
     @Override
     public Server setupEndpoint(Endpoint endpoint) {
         EndpointData endpointData = prepareEndpointData(endpoint);
-        endpoints.put(endpointData.getUrlPattern(), endpointData);
+        endpoints.put(baseUrl() + endpointData.getUrlPattern(), endpointData);
         return this;
     }
 
@@ -51,7 +51,7 @@ public class FakeHttp implements Server, HttpClient {
         EndpointData endpointData = route(request);
         Endpoint endpoint = endpointData.getEndpoint();
 
-        Pattern pattern = Pattern.compile(endpointData.getUrlPattern());
+        Pattern pattern = Pattern.compile(baseUrl() + endpointData.getUrlPattern());
         Matcher matcher = pattern.matcher(request.getUrl());
         List<String> variables = endpointData.getVariables();
         Map<String, String> variableValues = new HashMap<>();
@@ -70,6 +70,11 @@ public class FakeHttp implements Server, HttpClient {
     @Override
     public Object prepare() {
         return null;
+    }
+
+    @Override
+    public String baseUrl() {
+        return "fake://localhost";
     }
 
     @Override
