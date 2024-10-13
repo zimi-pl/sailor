@@ -29,7 +29,7 @@ public class EndpointsBuilder {
     }
 
     public static String preparePath(Class<?> serviceClass) {
-        String servicePart = serviceClass.getSimpleName().replace("Service", "");
+        String servicePart = serviceClass.getSimpleName().replace("ServiceImpl", "").replace("Service", "");
         String path = servicePart.substring(0, 1).toLowerCase() + servicePart.substring(1);
         return path;
     }

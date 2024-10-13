@@ -29,6 +29,6 @@ public class FakeRequestDecoder implements RequestDecoder {
 
     @Override
     public String body() {
-        return null;
+        return body;
     }
 }

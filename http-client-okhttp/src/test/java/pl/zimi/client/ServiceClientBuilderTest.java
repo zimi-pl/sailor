@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @WireMockTest
-public class OkhttpClientTest {
+public class ServiceClientBuilderTest {
 
     class Dto {
         String id;

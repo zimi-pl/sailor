@@ -11,20 +11,17 @@ import java.util.List;
 
 public class ServiceClientBuilder {
 
-    static <T> T client(Class<T> serviceClass, String baseUrl, HttpClient httpClient) {
-        return ProxyProvider.provide(serviceClass, baseUrl, httpClient);
+    public static <T> T client(Class<T> serviceClass, String baseUrl, HttpClient httpClient) {
+        return provide(serviceClass, baseUrl, httpClient);
     }
 
-    public static class ProxyProvider {
+    private static <T> T provide(Class<T> interfaceToProxy, String baseUrl, HttpClient client) {
+        List<Endpoint> endpoints = EndpointsBuilder.prepareEndpoints(interfaceToProxy);
 
-        public static <T> T provide(Class<T> interfaceToProxy, String baseUrl, HttpClient client) {
-            List<Endpoint> endpoints = EndpointsBuilder.prepareEndpoints(interfaceToProxy);
-
-            InvocationHandler handler = new EndpointInvocationHandler(endpoints, baseUrl, client, interfaceToProxy);
-            return (T) Proxy.newProxyInstance(interfaceToProxy.getClassLoader(),
-                    new Class[] { interfaceToProxy },
-                    handler);
-        }
+        InvocationHandler handler = new EndpointInvocationHandler(endpoints, baseUrl, client, interfaceToProxy);
+        return (T) Proxy.newProxyInstance(interfaceToProxy.getClassLoader(),
+                new Class[] { interfaceToProxy },
+                handler);
     }
 
     public static class EndpointInvocationHandler implements InvocationHandler {

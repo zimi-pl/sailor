@@ -1,7 +1,6 @@
 package pl.zimi.http;
 
 import org.junit.jupiter.api.Test;
-import pl.zimi.client.FakeClient;
 
 import java.util.Arrays;
 
@@ -26,7 +25,7 @@ class FakeServerTest {
                 .build();
 
         // when
-        FakeServer.EndpointData endpointData = new FakeServer().prepareEndpointData(endpoint);
+        FakeHttp.EndpointData endpointData = new FakeHttp().prepareEndpointData(endpoint);
 
         // then
         assertEquals(Arrays.asList("id", "test", "hello"), endpointData.getVariables());
