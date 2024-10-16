@@ -15,9 +15,10 @@ public class FlashcardScenarios {
         return flashcardService.add(flashcard);
     }
 
-    Flashcard addFlashcardForSameUser(Flashcard template) {
+    Flashcard addFlashcardForSameDeck(Flashcard template) {
         var flashcard = AddFlashcardRequestFixture.someAddFlashcardRequestBuilder()
                 .userId(template.getUserId())
+                .deckId(template.getDeckId())
                 .build();
         return flashcardService.add(flashcard);
     }

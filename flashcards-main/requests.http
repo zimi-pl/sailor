@@ -19,10 +19,50 @@ Content-Type: application/json
   }
 }
 
+### Add flashcard
+POST http://localhost:7070/flashcard/add
+Content-Type: application/json
+
+{
+  "userId": {
+    "value": "asdfa"
+  },
+  "original": {
+    "text": "dog",
+    "context": "This is my dog."
+  },
+  "translation": {
+    "text": "pies",
+    "context": "To jest mój pies."
+  },
+  "deckId": {
+    "value": "talia"
+  }
+}
+
 ### show next flashcard
 POST http://localhost:7070/flashcard/next
 Content-Type: application/json
 
 {
   "value": "asdfa"
+}
+
+
+### show next flashcard
+POST http://localhost:7070/flashcard/answer
+Content-Type: application/json
+
+{
+  "flashcardId": "1",
+  "translation": "pies",
+  "confidence": "EXCELENT"
+}
+
+### show next flashcard
+POST http://localhost:7070/flashcard/listDeck
+Content-Type: application/json
+
+{
+  "value": "talia"
 }

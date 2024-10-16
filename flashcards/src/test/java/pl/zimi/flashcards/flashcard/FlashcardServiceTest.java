@@ -7,8 +7,7 @@ import pl.zimi.flashcards.user.UserFixture;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FlashcardServiceTest {
 
@@ -56,7 +55,7 @@ class FlashcardServiceTest {
 
         flashcardScenarios.answerCorrectly(better);
 
-        final var worse = flashcardScenarios.addFlashcardForSameUser(better);
+        final var worse = flashcardScenarios.addFlashcardForSameDeck(better);
 
         final var clockManipulator = app.getBean(ClockManipulator.class);
         clockManipulator.addMinutes(6);
@@ -119,7 +118,9 @@ class FlashcardServiceTest {
         var returned = flashcardService.answer(answer);
 
         // then
-        assertEquals(AnswerResult.failure(), returned);
+        assertTrue(returned.isFailure());
+        assertNull(returned.getCorrect());
+        assertEquals("There is no flashcard with id: " + answer.getFlashcardId(), returned.getErrors().get(0));
     }
 
     @Test
@@ -228,4 +229,41 @@ class FlashcardServiceTest {
         assertEquals(1, next.getMemorizationLevel().getNumberOfSuccesses());
     }
 
+    @Test
+    void shouldListDeck() {
+        final var app = App.createApp();
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+
+        final var flashcard = flashcardScenarios.addFlashcard();
+        flashcardScenarios.addFlashcardForSameDeck(flashcard);
+
+        // flashcard from other deck
+        flashcardScenarios.addFlashcard();
+
+        // when
+        final var list = app.getBean(FlashcardService.class).listDeck(flashcard.getDeckId());
+
+        // then
+        assertEquals(2, list.size());
+    }
+
+    @Test
+    void doNotCountCorrectAnswerIfTimeNotElapsed() {
+        final var app = App.createApp();
+        FlashcardScenarios flashcardScenarios = app.getBean(FlashcardScenarios.class);
+
+        final var flashcard = flashcardScenarios.addFlashcard();
+
+        flashcardScenarios.answerCorrectly(flashcard);
+
+        // when
+        AnswerResult result = flashcardScenarios.answerCorrectly(flashcard);
+
+        // then
+        assertEquals(AnswerResult.failure("This answer is not count as time have not elapsed for this flashcard."), result);
+
+        FlashcardRepository flashcardRepository = app.getBean(FlashcardRepository.class);
+        Flashcard freshFlashcard = flashcardRepository.findById(flashcard.getId()).get();
+        assertEquals(1, freshFlashcard.memorizationLevel.numberOfSuccesses);
+    }
 }

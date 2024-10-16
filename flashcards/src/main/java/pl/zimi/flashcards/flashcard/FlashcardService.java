@@ -1,11 +1,14 @@
 package pl.zimi.flashcards.flashcard;
 
 import lombok.RequiredArgsConstructor;
+import pl.zimi.flashcards.deck.DeckId;
 import pl.zimi.flashcards.strategy.ExpotentialMemorizationStrategy;
 import pl.zimi.flashcards.user.UserId;
 import pl.zimi.repository.query.*;
 
 import java.time.Clock;
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -40,12 +43,16 @@ public class FlashcardService {
 
     public AnswerResult answer(Answer answer) {
         final var memorizationStrategy = new ExpotentialMemorizationStrategy();
-        final var flashcards = flashcardRepository.findById(answer.getFlashcardId());
-        if (flashcards.isEmpty()) {
-            return AnswerResult.failure();
+        final var flashcardOptional = flashcardRepository.findById(answer.getFlashcardId());
+        if (flashcardOptional.isEmpty()) {
+            return AnswerResult.failure("There is no flashcard with id: " + answer.getFlashcardId());
         }
-        final var flashcard = flashcards.get();
+        final var flashcard = flashcardOptional.get();
         if (flashcard.getTranslation().getText().equals(answer.getTranslation())) {
+            Instant useAfter = Optional.ofNullable(flashcard.getMemorizationLevel()).map(MemorizationLevel::getUseAfter).orElse(Instant.MIN);
+            if (!useAfter.isBefore(clock.instant())) {
+                return AnswerResult.failure("This answer is not count as time have not elapsed for this flashcard.");
+            }
             flashcard.memorizationLevel.upgrade(clock.instant(), memorizationStrategy);
             flashcardRepository.save(flashcard);
             return AnswerResult.correct();
@@ -54,5 +61,10 @@ public class FlashcardService {
             flashcardRepository.save(flashcard);
             return AnswerResult.mistake();
         }
+    }
+
+    public List<Flashcard> listDeck(DeckId deckId) {
+        Query query = Query.builder().filter(Filters.eq(SFlashcard.flashcard.deckId, deckId)).build();
+        return flashcardRepository.find(query);
     }
 }

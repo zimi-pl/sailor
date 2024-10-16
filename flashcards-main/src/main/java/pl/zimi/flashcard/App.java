@@ -17,17 +17,7 @@ public class App {
         context.register(Clock.class, Clock.systemUTC());
         FlashcardService flashcardService = context.getBean(FlashcardService.class);
 
-//        Endpoint endpoint = Endpoint.get()
-//                .path("/flashcards/{a}/{b}/{c}")
-//                .mapping("a", SSomeRequest.someRequest.a)
-//                .mapping("b", SSomeRequest.someRequest.b)
-//                .mapping("c", SSomeRequest.someRequest.c)
-//                .requestClass(SomeRequest.class)
-//                .handler(o -> someService.add((SomeRequest) o))
-//                .build();
-
         JavalinServer.server()
-//                .setupEndpoint(endpoint)
                 .setupService(flashcardService)
                 .prepare()
                 .start(7070);
