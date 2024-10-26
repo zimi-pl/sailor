@@ -56,6 +56,14 @@ public class JavalinServer implements Server<Javalin>, HttpClient {
     }
 
     public static JavalinServer server() {
-        return new JavalinServer(Javalin.create());
+        Javalin javalin = Javalin.create(config -> {
+            config.bundledPlugins.enableCors(cors -> {
+                cors.addRule(it -> {
+                    it.anyHost();
+                });
+            });
+        });
+
+        return new JavalinServer(javalin);
     }
 }

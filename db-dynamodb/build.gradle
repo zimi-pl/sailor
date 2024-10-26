@@ -12,18 +12,15 @@ repositories {
 }
 
 dependencies {
-//    implementation ('com.google.guava:guava:33.1.0-jre')
     implementation 'com.google.code.gson:gson:2.11.0'
     implementation 'org.projectlombok:lombok:1.18.20'
 
-    implementation 'org.slf4j:slf4j-simple:2.0.10'
+//    implementation 'org.slf4j:slf4j-simple:2.0.10'
 
-    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.12'
     testImplementation ('org.wiremock:wiremock:3.9.1')
 
     implementation project(":annotation")
     annotationProcessor project(":annotation")
-
 
     implementation project(':common')
 
@@ -36,15 +33,6 @@ dependencies {
     testImplementation 'org.apache.commons:commons-lang3:3.14.0'
 
 }
-
-//sourceSets.all {
-//    configurations.getByName(runtimeClasspathConfigurationName) {
-//        attributes.attribute(Attribute.of("org.gradle.jvm.environment", String), "standard-jvm")
-//    }
-//    configurations.getByName(compileClasspathConfigurationName) {
-//        attributes.attribute(Attribute.of("org.gradle.jvm.environment", String), "standard-jvm")
-//    }
-//}
 
 test {
     useJUnitPlatform()

@@ -49,7 +49,7 @@ Content-Type: application/json
 }
 
 
-### show next flashcard
+### answer
 POST http://localhost:7070/flashcard/answer
 Content-Type: application/json
 

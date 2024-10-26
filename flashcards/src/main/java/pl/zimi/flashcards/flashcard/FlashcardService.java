@@ -27,7 +27,9 @@ public class FlashcardService {
         final var sorter = Sorters.asc(SFlashcard.flashcard.memorizationLevel.numberOfSuccesses);
         final var query = Queries.query(filter, sorter, new LimitOffset(1L, 0L));
         final var found = flashcardRepository.find(query);
-        return found.stream().findFirst().map(flashcard -> Question.builder().flashcardId(flashcard.getId()).original(flashcard.getOriginal()).build());
+        return found.stream()
+                .findFirst()
+                .map(flashcard -> Question.builder().flashcardId(flashcard.getId()).original(flashcard.getOriginal()).translation(flashcard.getTranslation()).build());
     }
 
     public Flashcard add(AddFlashcardRequest request) {

@@ -13,5 +13,6 @@ public class Question {
 
     String flashcardId;
     Phrase original;
+    Phrase translation;
 
 }
