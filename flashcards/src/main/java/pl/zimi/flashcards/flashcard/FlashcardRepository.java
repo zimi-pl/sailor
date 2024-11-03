@@ -5,6 +5,6 @@ import pl.zimi.repository.query.Repository;
 
 public interface FlashcardRepository extends Repository<Flashcard> {
 
-    Contract<Flashcard> CONTRACT = Contract.repository(Flashcard.class).id(SFlashcard.flashcard.id);
+    Contract<Flashcard> CONTRACT = Contract.repository(Flashcard.class).id(SFlashcard.flashcard.id).sorting(false);
 
 }

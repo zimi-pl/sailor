@@ -8,6 +8,7 @@ import pl.zimi.repository.query.*;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,10 +25,10 @@ public class FlashcardService {
         final var useAfterIsNullFilter = Filters.isNull(SFlashcard.flashcard.memorizationLevel.useAfter);
         final var filter = Filters.and(userFilter, Filters.or(useAfterFilter, useAfterIsNullFilter));
 
-        final var sorter = Sorters.asc(SFlashcard.flashcard.memorizationLevel.numberOfSuccesses);
-        final var query = Queries.query(filter, sorter, new LimitOffset(1L, 0L));
+        final var query = Queries.query(filter, null, new LimitOffset(10L, 0L));
         final var found = flashcardRepository.find(query);
         return found.stream()
+                .sorted(Comparator.comparingInt(flashcard -> flashcard.memorizationLevel.numberOfSuccesses))
                 .findFirst()
                 .map(flashcard -> Question.builder().flashcardId(flashcard.getId()).original(flashcard.getOriginal()).translation(flashcard.getTranslation()).build());
     }

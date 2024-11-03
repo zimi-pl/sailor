@@ -1,5 +1,6 @@
 package pl.zimi.repository.manipulation;
 
+import com.google.gson.Gson;
 import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.annotation.TypedDescriptor;
 
@@ -84,5 +85,11 @@ public class Manipulator {
     public static Class<?> detectSingleArgumentClass(Class<?> requestClass) {
         Constructor<?> declaredConstructor = requestClass.getDeclaredConstructors()[0];
         return declaredConstructor.getParameterTypes()[0];
+    }
+
+    public static <T> T deepCopy(final T toCopy) {
+        Gson gson = new Gson();
+        final Class<T> type = (Class<T>) toCopy.getClass();
+        return gson.fromJson(gson.toJson(toCopy), type);
     }
 }

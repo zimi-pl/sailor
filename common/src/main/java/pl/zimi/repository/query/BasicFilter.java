@@ -7,7 +7,7 @@ import pl.zimi.repository.annotation.Descriptor;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-class BasicFilter implements Filter {
+public class BasicFilter implements Filter {
 
     private final Descriptor path;
     private final Object expectedValue;

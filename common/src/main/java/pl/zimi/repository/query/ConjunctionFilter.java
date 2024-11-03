@@ -28,6 +28,19 @@ public class ConjunctionFilter implements Filter {
         return combine(first.test(o), second.test(o));
     }
 
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public Filter getFirst() {
+        return first;
+    }
+
+    public Filter getSecond() {
+        return second;
+    }
+
     private boolean combine(final boolean first, final boolean second) {
         if (AND.equals(operator)) {
             return first && second;

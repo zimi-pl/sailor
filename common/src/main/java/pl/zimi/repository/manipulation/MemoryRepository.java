@@ -5,6 +5,7 @@ import pl.zimi.repository.annotation.Descriptor;
 import pl.zimi.repository.annotation.TypedDescriptor;
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.contract.OptimisticLockException;
+import pl.zimi.repository.contract.UnsupportedFeatureException;
 import pl.zimi.repository.query.Filters;
 import pl.zimi.repository.query.Queries;
 import pl.zimi.repository.query.Query;
@@ -28,14 +29,9 @@ public class MemoryRepository<T> implements Repository<T> {
         this.versionDescriptor = contract.getVersion();
     }
 
-    private T deepCopy(final T toCopy) {
-        final Class<T> type = (Class<T>) toCopy.getClass();
-        return gson.fromJson(gson.toJson(toCopy), type);
-    }
-
     @Override
     public T save(T entity) {
-        final T copied = deepCopy(entity);
+        final T copied = Manipulator.deepCopy(entity);
         if (contract.getId() != null && Manipulator.get(copied, contract.getId()).getObject() == null) {
             final var newId = Integer.toString(idCounter.getAndIncrement());
             if (contract.getId() instanceof TypedDescriptor && !((TypedDescriptor)contract.getId()).getType().equals(String.class)) {
@@ -69,7 +65,7 @@ public class MemoryRepository<T> implements Repository<T> {
         }
         final var id = contract.getId() != null ? Manipulator.get(copied, contract.getId()).getObject() : UUID.randomUUID().toString();
         source.put(id, copied);
-        return deepCopy(copied);
+        return Manipulator.deepCopy(copied);
     }
 
     @Override
@@ -89,6 +85,9 @@ public class MemoryRepository<T> implements Repository<T> {
     public List<T> find(final Query query) {
         final var filter = query.getFilter();
         final var sort = query.getSorter();
+        if (sort != null && !contract.isSorting()) {
+            throw new UnsupportedFeatureException("Sorting");
+        }
         final var limit = query.getLimitOffset();
         final Stream<T> streamed = source.values().stream();
         final Stream<T> filtered = filter != null ? streamed.filter(filter::test) : streamed;
@@ -96,7 +95,7 @@ public class MemoryRepository<T> implements Repository<T> {
         final Stream<T> skipped = limit != null && limit.getOffset() != null ? sorted.skip(limit.getOffset()) : sorted;
         final Stream<T> limited = limit != null && limit.getLimit() != null ? skipped.limit(limit.getLimit()) : skipped;
         return limited
-                .map(this::deepCopy)
+                .map(toCopy -> Manipulator.deepCopy(toCopy))
                 .collect(Collectors.toList());
     }
 

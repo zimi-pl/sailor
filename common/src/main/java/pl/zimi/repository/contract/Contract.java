@@ -2,14 +2,13 @@ package pl.zimi.repository.contract;
 
 import pl.zimi.repository.annotation.Descriptor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Contract<T> {
 
     private final Class<T> entityClass;
     private Descriptor version;
     private Descriptor id;
+
+    private boolean sorting;
 
     public Contract(final Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -29,7 +28,12 @@ public class Contract<T> {
         return this;
     }
 
-    Class<T> getEntityClass() {
+    public Contract<T> sorting(final boolean sorting) {
+        this.sorting = sorting;
+        return this;
+    }
+
+    public Class<T> getEntityClass() {
         return entityClass;
     }
 
@@ -39,5 +43,9 @@ public class Contract<T> {
 
     public Descriptor getId() {
         return id;
+    }
+
+    public boolean isSorting() {
+        return sorting;
     }
 }

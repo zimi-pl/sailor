@@ -6,7 +6,7 @@ import pl.zimi.repository.example.SFoo;
 
 class ContractVerificatorTest {
 
-    private Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version);
+    private Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version).sorting(true);
 
     @Test
     void saveAndRead() {
@@ -25,7 +25,7 @@ class ContractVerificatorTest {
 
     @Test
     void filterStringEqual() {
-        ContractVerificator.filterStringEqual(MemoryPort.port(contract), Foo.class, SFoo.foo.def);
+        ContractVerificator.filterStringEqual(MemoryPort.port(contract), Foo.class, SFoo.foo.def, SFoo.foo.id);
     }
 
     @Test
@@ -50,7 +50,7 @@ class ContractVerificatorTest {
 
     @Test
     void limit() {
-        ContractVerificator.limit(MemoryPort.port(contract), Foo.class, SFoo.foo.def);
+        ContractVerificator.limit(MemoryPort.port(contract), Foo.class, SFoo.foo.id, SFoo.foo.def);
     }
 
     @Test
@@ -60,7 +60,7 @@ class ContractVerificatorTest {
 
     @Test
     void andPredicate() {
-        ContractVerificator.andPredicate(MemoryPort.port(contract), Foo.class, SFoo.foo.def);
+        ContractVerificator.andPredicate(MemoryPort.port(contract), Foo.class, SFoo.foo.value);
     }
 
     @Test
@@ -70,7 +70,7 @@ class ContractVerificatorTest {
 
     @Test
     void lowerThan() {
-        ContractVerificator.lowerThan(MemoryPort.port(contract), Foo.class, SFoo.foo.def, SFoo.foo.value);
+        ContractVerificator.lowerThan(MemoryPort.port(contract), Foo.class, SFoo.foo.id, SFoo.foo.def, SFoo.foo.value);
     }
     
     @Test
@@ -106,6 +106,12 @@ class ContractVerificatorTest {
     @Test
     void sortingDescendingWithNull() {
         ContractVerificator.sortingDescendingWithNull(MemoryPort.port(contract), Foo.class, SFoo.foo.bar.str, SFoo.foo.def);
+    }
+
+    @Test
+    void sortFails() {
+        Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).sorting(false);
+        ContractVerificator.sortFails(MemoryPort.port(contract), SFoo.foo.def);
     }
 
     @Test
