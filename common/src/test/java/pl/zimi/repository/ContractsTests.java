@@ -25,10 +25,10 @@ public class ContractsTests {
 
     @Test
     void testSubsetContract() {
-        final Contract<Foo> contract = Contract.repository(Foo.class).sorting(true);
+        final Contract<Foo> contract = Contract.repository(Foo.class).sortingFeature(true).offsetFeature(true).regexFeature(true);
         final var contractForPort = Contract.repository(Foo.class)
                 .version(SFoo.foo.version)
-                .sorting(true);
+                .sortingFeature(true);
 
         final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contractForPort);
         ContractVerificator.assertThese(contract, differentSupplier);
@@ -36,7 +36,7 @@ public class ContractsTests {
 
     @Test
     void testExactContract() {
-        final Contract<Foo> contract = Contract.repository(Foo.class).sorting(true);
+        final Contract<Foo> contract = Contract.repository(Foo.class).sortingFeature(true).offsetFeature(true).regexFeature(true);
 
         final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contract);
         ContractVerificator.assertThese(contract, differentSupplier);

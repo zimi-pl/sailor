@@ -85,7 +85,7 @@ public class MemoryRepository<T> implements Repository<T> {
     public List<T> find(final Query query) {
         final var filter = query.getFilter();
         final var sort = query.getSorter();
-        if (sort != null && !contract.isSorting()) {
+        if (sort != null && !contract.isSortingFeature()) {
             throw new UnsupportedFeatureException("Sorting");
         }
         final var limit = query.getLimitOffset();

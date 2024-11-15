@@ -8,7 +8,9 @@ public class Contract<T> {
     private Descriptor version;
     private Descriptor id;
 
-    private boolean sorting;
+    private boolean sortingFeature;
+    private boolean regexFeature;
+    private boolean offsetFeature;
 
     public Contract(final Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -28,8 +30,18 @@ public class Contract<T> {
         return this;
     }
 
-    public Contract<T> sorting(final boolean sorting) {
-        this.sorting = sorting;
+    public Contract<T> sortingFeature(final boolean sorting) {
+        this.sortingFeature = sorting;
+        return this;
+    }
+
+    public Contract<T> offsetFeature(final boolean offsetFeature) {
+        this.offsetFeature = offsetFeature;
+        return this;
+    }
+
+    public Contract<T> regexFeature(final boolean regexFeature) {
+        this.regexFeature = regexFeature;
         return this;
     }
 
@@ -45,7 +57,15 @@ public class Contract<T> {
         return id;
     }
 
-    public boolean isSorting() {
-        return sorting;
+    public boolean isSortingFeature() {
+        return sortingFeature;
+    }
+
+    public boolean isRegexFeature() {
+        return regexFeature;
+    }
+
+    public boolean isOffsetFeature() {
+        return offsetFeature;
     }
 }

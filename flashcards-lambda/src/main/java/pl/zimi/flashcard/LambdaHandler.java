@@ -7,15 +7,13 @@ import com.amazonaws.services.lambda.runtime.logging.LogLevel;
 import pl.sailor.aws.ServerlessServer;
 import pl.zimi.client.Request;
 import pl.zimi.client.Response;
-import pl.zimi.flashcards.deck.DeckId;
-import pl.zimi.flashcards.flashcard.AddFlashcardRequest;
 import pl.zimi.flashcards.flashcard.FlashcardRepository;
 import pl.zimi.flashcards.flashcard.FlashcardService;
-import pl.zimi.flashcards.flashcard.Phrase;
-import pl.zimi.flashcards.user.UserId;
 import pl.zimi.http.HttpMethod;
 import pl.zimi.http.Server;
-import pl.zimi.repository.contract.MemoryPort;
+import pl.zimi.repository.DynamoDbPort;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -40,19 +38,12 @@ public class LambdaHandler implements RequestHandler<ApiGatewayRequest, ApiGatew
 
     private ApiGatewayProxyResponse handle(ApiGatewayRequest apiGatewayRequest) {
         pl.zimi.context.Context context = pl.zimi.context.Context.create();
-        context.register(FlashcardRepository.class, MemoryPort.port(FlashcardRepository.class));
+        DynamoDbClient client = DynamoDbClient.builder()
+                .region(Region.EU_CENTRAL_1)
+                .build();
+        context.register(FlashcardRepository.class, DynamoDbPort.port(FlashcardRepository.class, client, "flashcards-dev-"));
         context.register(Clock.class, Clock.systemUTC());
         FlashcardService flashcardService = context.getBean(FlashcardService.class);
-
-        for (int i = 0; i < 100; i++) {
-            AddFlashcardRequest request = AddFlashcardRequest.builder()
-                    .userId(UserId.of("asdfa"))
-                    .original(Phrase.builder().text("a" + i).context("Tu jest a" + i).build())
-                    .translation(Phrase.builder().text("A" + i).context("TU JEST A" + i).build())
-                    .deckId(new DeckId("talia"))
-                    .build();
-            flashcardService.add(request);
-        }
 
         Server server = new ServerlessServer()
                 .setupService(flashcardService);

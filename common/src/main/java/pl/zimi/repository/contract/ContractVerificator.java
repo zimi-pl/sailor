@@ -31,16 +31,14 @@ public class ContractVerificator {
                 new Test("independenceAfterFind", () -> independenceAfterFind(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
                 new Test("noFilter", () -> noFilter(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
                 new Test("limit", () -> limit(supplier.apply(contract), contract.getEntityClass(), idDescriptor, distinctDescriptor)),
-                new Test("offset", () -> offset(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
                 new Test("andPredicate", () -> andPredicate(supplier.apply(contract), contract.getEntityClass(), numberDescriptor)),
                 new Test("orPredicate", () -> orPredicate(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
 
                 new Test("filterStringEqual", () -> filterStringEqual(supplier.apply(contract), contract.getEntityClass(), stringDescriptor, distinctDescriptor)),
-                new Test("filterStringRegex", () -> filterStringRegex(supplier.apply(contract), contract.getEntityClass(), stringDescriptor)),
-
 
                 new Test("lowerThan", () -> lowerThan(supplier.apply(contract), contract.getEntityClass(), idDescriptor, distinctDescriptor, numberDescriptor)),
                 new Test("greaterThan", () -> greaterThan(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor, numberDescriptor)),
+                new Test("isNull", () -> isNull(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor, numberDescriptor)),
                 new Test("nullHandlingLowerThan", () -> nullHandlingLowerThan(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor, numberDescriptor)),
                 new Test("nullHandlingGreaterThan", () -> nullHandlingGreaterThan(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor, numberDescriptor)),
 
@@ -60,13 +58,23 @@ public class ContractVerificator {
             tests.add(new Test("findByIdWorksForExistingIdContract", () -> findByIdWorksForExistingIdContract(supplier.apply(contract), contract.getEntityClass(), contract.getId())));
             tests.add(new Test("findByIdReturnsEmptyOptionalForExistingIdContract", () -> findByIdReturnsEmptyOptionalForExistingIdContract(supplier.apply(contract))));
         }
-        if (contract.isSorting()) {
+        if (contract.isSortingFeature()) {
             tests.add(new Test("sort", () -> sort(supplier.apply(contract), contract.getEntityClass(), stringDescriptor)));
             tests.add(new Test("sortReversed", () -> sortReversed(supplier.apply(contract), contract.getEntityClass(), stringDescriptor)));
             tests.add(new Test("sortingAscendingWithNull", () -> sortingAscendingWithNull(supplier.apply(contract), contract.getEntityClass(), compoundDescriptor, distinctDescriptor)));
             tests.add(new Test("sortingDescendingWithNull", () -> sortingDescendingWithNull(supplier.apply(contract), contract.getEntityClass(), compoundDescriptor, distinctDescriptor)));
         } else {
             tests.add(new Test("sortFails", () -> sortFails(supplier.apply(contract), distinctDescriptor)));
+        }
+        if (contract.isRegexFeature()) {
+            tests.add(new Test("filterStringRegex", () -> filterStringRegex(supplier.apply(contract), contract.getEntityClass(), stringDescriptor)));
+        } else {
+            tests.add(new Test("regexFails", () -> regexFails(supplier.apply(contract), distinctDescriptor)));
+        }
+        if (contract.isOffsetFeature()) {
+            tests.add(new Test("offset", () -> offset(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)));
+        } else {
+            tests.add(new Test("offsetFails", () -> offsetFails(supplier.apply(contract))));
         }
 
         if (contract.getVersion() != null) {
@@ -364,6 +372,26 @@ public class ContractVerificator {
         assertEquals("value GREATER_THAN 7", predicateGt.describe());
     }
 
+    static <T> void isNull(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
+        final var foo1 = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo1, distinctDescriptor, "isNull_withoutNull");
+        Manipulator.set(foo1, intDescriptor, 7);
+        repository.save(foo1);
+
+        final T foo = Manipulator.noArgConstructor(clazz);
+        Manipulator.set(foo, distinctDescriptor, "isNull_withNull");
+        Manipulator.set(foo, intDescriptor, null);
+        repository.save(foo);
+
+        final Filter isNullPredicate = Filters.isNull(intDescriptor);
+
+        final List<T> foos = repository.find(Queries.filter(isNullPredicate));
+
+        assertEquals(1, foos.size());
+        assertEquals(Manipulator.get(foo, distinctDescriptor).getObject(), Manipulator.get(foos.get(0), distinctDescriptor).getObject());
+        assertEquals("value IS_NULL", isNullPredicate.describe());
+    }
+
 
     static <T> void compoundObject(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
@@ -474,6 +502,14 @@ public class ContractVerificator {
 
     static <T> void sortFails(final Repository<T> repository, final TypedDescriptor<String> descriptor) {
         assertThrows(UnsupportedFeatureException.class, () -> repository.find(Queries.query(null, Sorters.asc(descriptor), null)));
+    }
+
+    static <T> void regexFails(final Repository<T> repository, final TypedDescriptor<String> descriptor) {
+        assertThrows(UnsupportedFeatureException.class, () -> repository.find(Queries.query(Filters.regex(descriptor, "pattern"), null, null)));
+    }
+
+    static <T> void offsetFails(final Repository<T> repository) {
+        assertThrows(UnsupportedFeatureException.class, () -> repository.find(Queries.query(null, null, new LimitOffset(10L, 10L))));
     }
 
     static <T> void idContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {

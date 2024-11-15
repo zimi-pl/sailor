@@ -20,7 +20,7 @@ public class FlashcardService {
     final Clock clock;
 
     public Optional<Question> next(UserId userId) {
-        final var userFilter = Filters.eq(SFlashcard.flashcard.userId, userId);
+        final var userFilter = Filters.eq(SFlashcard.flashcard.userId.value, userId.getValue());
         final var useAfterFilter = Filters.lt(SFlashcard.flashcard.memorizationLevel.useAfter, clock.instant());
         final var useAfterIsNullFilter = Filters.isNull(SFlashcard.flashcard.memorizationLevel.useAfter);
         final var filter = Filters.and(userFilter, Filters.or(useAfterFilter, useAfterIsNullFilter));
@@ -67,7 +67,7 @@ public class FlashcardService {
     }
 
     public List<Flashcard> listDeck(DeckId deckId) {
-        Query query = Query.builder().filter(Filters.eq(SFlashcard.flashcard.deckId, deckId)).build();
+        Query query = Query.builder().filter(Filters.eq(SFlashcard.flashcard.deckId.value, deckId.getValue())).build();
         return flashcardRepository.find(query);
     }
 }

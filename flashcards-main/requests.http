@@ -1,5 +1,5 @@
 ### Add flashcard
-POST http://localhost:7070/flashcard/add
+POST https://api.cango.pl/flashcard/add
 Content-Type: application/json
 
 {

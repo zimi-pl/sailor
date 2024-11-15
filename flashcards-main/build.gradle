@@ -25,6 +25,8 @@ dependencies {
     implementation project(':common')
     implementation project(':flashcards')
 
+    implementation 'software.amazon.awssdk:dynamodb:2.29.0'
+    implementation project(':db-dynamodb')
     implementation project(':http-javalin')
 
     compileOnly 'org.projectlombok:lombok:1.18.20'

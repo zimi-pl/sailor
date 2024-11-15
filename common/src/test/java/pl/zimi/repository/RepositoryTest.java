@@ -17,7 +17,7 @@ public class RepositoryTest {
 
     @TestFactory
     List<DynamicTest> repositoryTest() {
-        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version).sorting(true);
+        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version).sortingFeature(true).regexFeature(true).offsetFeature(true);
         return ContractVerificator.test(contract, MemoryPort::port)
                 .stream()
                 .map(t -> dynamicTest("ContractVerificator." + t.name, () -> t.runnable.run()))

@@ -6,7 +6,7 @@ import pl.zimi.repository.example.SFoo;
 
 class ContractVerificatorTest {
 
-    private Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version).sorting(true);
+    private Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version).sortingFeature(true);
 
     @Test
     void saveAndRead() {
@@ -79,6 +79,11 @@ class ContractVerificatorTest {
     }
 
     @Test
+    void isNull() {
+        ContractVerificator.isNull(MemoryPort.port(contract), Foo.class, SFoo.foo.def, SFoo.foo.value);
+    }
+
+    @Test
     void compoundObject() {
         ContractVerificator.compoundObject(MemoryPort.port(contract), Foo.class, SFoo.foo.bar.str);
     }
@@ -110,7 +115,7 @@ class ContractVerificatorTest {
 
     @Test
     void sortFails() {
-        Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).sorting(false);
+        Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).sortingFeature(false);
         ContractVerificator.sortFails(MemoryPort.port(contract), SFoo.foo.def);
     }
 

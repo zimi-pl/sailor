@@ -1,6 +1,7 @@
 package pl.zimi.repository;
 
 import pl.zimi.repository.contract.Contract;
+import pl.zimi.repository.contract.OptimisticLockException;
 import pl.zimi.repository.contract.UnsupportedFeatureException;
 import pl.zimi.repository.manipulation.Manipulator;
 import pl.zimi.repository.manipulation.Value;
@@ -9,6 +10,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.paginators.ScanIterable;
 
+import java.time.Instant;
 import java.util.*;
 
 public class DynamoDbRepository<T> implements Repository<T> {
@@ -26,8 +28,10 @@ public class DynamoDbRepository<T> implements Repository<T> {
     @Override
     public T save(T entity) {
         T copy = Manipulator.deepCopy(entity);
+        Object initVersion = null;
         if (contract.getVersion() != null) {
             Object object = Manipulator.get(copy, contract.getVersion()).getObject();
+            initVersion = object;
             if (object != null) {
                 Object toSet = null;
                 if (object instanceof Integer) {
@@ -41,6 +45,7 @@ public class DynamoDbRepository<T> implements Repository<T> {
             }
 
         }
+        boolean isNew = false;
         Map<String, AttributeValue> itemValues = RepresentationBuilder.build(copy);
         if (contract.getId() != null) {
             Value value = Manipulator.get(copy, contract.getId());
@@ -48,17 +53,26 @@ public class DynamoDbRepository<T> implements Repository<T> {
                 String uuid = UUID.randomUUID().toString();
                 itemValues.put("id", AttributeValue.builder().s(uuid).build());
                 Manipulator.set(copy, contract.getId(), uuid);
+                isNew = true;
             }
         }
         String tableName = prepareTableName();
-        PutItemRequest request = PutItemRequest.builder()
+        PutItemRequest.Builder builder = PutItemRequest.builder()
                 .tableName(tableName)
-                .item(itemValues)
-                .build();
+                .item(itemValues);
+        if (!isNew) {
+            Map<String, AttributeValue> map = new HashMap<>();
+            map.put(":version", AttributeValue.builder().n(initVersion.toString()).build());
+            builder.conditionExpression("version = :version")
+                    .expressionAttributeValues(map);
+        }
+        PutItemRequest request = builder.build();
 
         try {
             dynamoDbClient.putItem(request);
             return copy;
+        } catch (ConditionalCheckFailedException e) {
+            throw new OptimisticLockException("");
         } catch (ResourceNotFoundException e) {
             throw new RuntimeException(e);
         } catch (DynamoDbException e) {
@@ -126,17 +140,22 @@ public class DynamoDbRepository<T> implements Repository<T> {
                 newParts.add(attributeNameKey);
             }
             String newAttribute = String.join(".", newParts);
-            AttributeValue av = null;
-            if (innerFilter.getExpectedValue() instanceof Long) {
-                av = AttributeValue.builder().n(innerFilter.getExpectedValue().toString()).build(); // Using Java 9+ Map.of
-            } else if (innerFilter.getExpectedValue() instanceof Integer) {
-                av = AttributeValue.builder().n(innerFilter.getExpectedValue().toString()).build(); // Using Java 9+ Map.of
-            } else {
-                av = AttributeValue.builder().s((String) innerFilter.getExpectedValue()).build(); // Using Java 9+ Map.of
+            String attributeValueKey = null;
+            if (!innerFilter.getOperator().equals(Operator.IS_NULL)) {
+                AttributeValue av = null;
+                if (innerFilter.getExpectedValue() instanceof Long) {
+                    av = AttributeValue.builder().n(innerFilter.getExpectedValue().toString()).build(); // Using Java 9+ Map.of
+                } else if (innerFilter.getExpectedValue() instanceof Integer) {
+                    av = AttributeValue.builder().n(innerFilter.getExpectedValue().toString()).build(); // Using Java 9+ Map.of
+                } else if (innerFilter.getExpectedValue() instanceof Instant) {
+                    av = AttributeValue.builder().s(innerFilter.getExpectedValue().toString()).build();
+                } else {
+                    av = AttributeValue.builder().s((String) innerFilter.getExpectedValue()).build(); // Using Java 9+ Map.of
+                }
+                attributeValueKey = attributeValueKey(expression, innerFilter.getPath());
+                expression.attributeValueMap.put(attributeValueKey, av);
             }
-            String attributeValueKey = attributeValueKey(expression, innerFilter.getPath());
-            expression.attributeValueMap.put(attributeValueKey, av);
-            String stringExpression = newAttribute + " " + operator(innerFilter.getOperator()) + " " + attributeValueKey;
+            String stringExpression = operator(innerFilter.getOperator(), newAttribute, attributeValueKey);
             expression.counter++;
             return stringExpression;
         }
@@ -150,14 +169,18 @@ public class DynamoDbRepository<T> implements Repository<T> {
         return "#" + escapeReservedName(path.replace(".", "_")) + expression.counter;
     }
 
-    private String operator(Operator operator) {
+    private String operator(Operator operator, String newAttribute, String attributeValueKey) {
         switch (operator) {
             case LOWER_THAN:
-                return "<";
+                return newAttribute + " < " + attributeValueKey;
             case GREATER_THAN:
-                return ">";
+                return newAttribute + " > " + attributeValueKey;
             case EQUAL:
-                return "=";
+                return newAttribute + " = " + attributeValueKey;
+            case IS_NULL:
+                return "attribute_not_exists(" + newAttribute + ")";
+            case REGEX:
+                throw new UnsupportedFeatureException("Regex");
         }
         throw new RuntimeException("Unknown operator: " + operator);
     }
@@ -176,6 +199,9 @@ public class DynamoDbRepository<T> implements Repository<T> {
         if (query.getSorter() != null) {
             throw new UnsupportedFeatureException("Sorting");
         }
+        if (Optional.ofNullable(query.getLimitOffset()).map(LimitOffset::getOffset).orElse(null) != null) {
+            throw new UnsupportedFeatureException("Offset");
+        }
 
         ScanRequest.Builder builder = ScanRequest
                 .builder()
@@ -185,8 +211,11 @@ public class DynamoDbRepository<T> implements Repository<T> {
             DynamoDBExpression filterExpression = prepareFilterExpression(query.getFilter());
             builder
                     .filterExpression(filterExpression.expression)
-                    .expressionAttributeNames(filterExpression.attributeNames)
-                    .expressionAttributeValues(filterExpression.attributeValueMap);
+                    .expressionAttributeNames(filterExpression.attributeNames);
+            if (!filterExpression.attributeValueMap.isEmpty()) {
+                builder
+                        .expressionAttributeValues(filterExpression.attributeValueMap);
+            }
         }
 
         if (query.getLimitOffset() != null) {
@@ -209,11 +238,10 @@ public class DynamoDbRepository<T> implements Repository<T> {
     @Override
     public T delete(T entity) {
 
-        HashMap<String,AttributeValue> keyToGet =
-                new HashMap<String,AttributeValue>();
+        HashMap<String, AttributeValue> keyToGet = new HashMap<>();
 
         keyToGet.put("id", AttributeValue.builder()
-                .s((String)Manipulator.get(entity, contract.getId()).getObject())
+                .s((String) Manipulator.get(entity, contract.getId()).getObject())
                 .build());
 
         DeleteItemRequest deleteReq = DeleteItemRequest.builder()
