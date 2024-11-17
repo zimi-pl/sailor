@@ -1,5 +1,5 @@
 ### Add flashcard
-POST https://api.cango.pl/flashcard/add
+POST {{base_url}}/flashcard/add
 Content-Type: application/json
 
 {
@@ -20,7 +20,7 @@ Content-Type: application/json
 }
 
 ### Add flashcard
-POST http://localhost:7070/flashcard/add
+POST {{base_url}}/flashcard/add
 Content-Type: application/json
 
 {
@@ -41,7 +41,7 @@ Content-Type: application/json
 }
 
 ### show next flashcard
-POST http://localhost:7070/flashcard/next
+POST {{base_url}}/flashcard/next
 Content-Type: application/json
 
 {
@@ -50,7 +50,7 @@ Content-Type: application/json
 
 
 ### answer
-POST http://localhost:7070/flashcard/answer
+POST {{base_url}}/flashcard/answer
 Content-Type: application/json
 
 {
@@ -60,7 +60,7 @@ Content-Type: application/json
 }
 
 ### show next flashcard
-POST http://localhost:7070/flashcard/listDeck
+POST {{base_url}}/flashcard/listDeck
 Content-Type: application/json
 
 {

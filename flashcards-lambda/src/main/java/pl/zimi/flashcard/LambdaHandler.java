@@ -27,7 +27,7 @@ public class LambdaHandler implements RequestHandler<ApiGatewayRequest, ApiGatew
         LambdaLogger logger = context.getLogger();
         logger.log("Processing question from " + request, LogLevel.INFO);
         try {
-            return handle(request);
+            return handle(request, context);
         } catch (Exception ex) {
             StringWriter errors = new StringWriter();
             ex.printStackTrace(new PrintWriter(errors));
@@ -36,24 +36,32 @@ public class LambdaHandler implements RequestHandler<ApiGatewayRequest, ApiGatew
         }
     }
 
-    private ApiGatewayProxyResponse handle(ApiGatewayRequest apiGatewayRequest) {
-        pl.zimi.context.Context context = pl.zimi.context.Context.create();
+    private ApiGatewayProxyResponse handle(ApiGatewayRequest apiGatewayRequest, Context context) {
+        LambdaLogger logger = context.getLogger();
+        logger.log("Before Dynamo");
         DynamoDbClient client = DynamoDbClient.builder()
                 .region(Region.EU_CENTRAL_1)
                 .build();
-        context.register(FlashcardRepository.class, DynamoDbPort.port(FlashcardRepository.class, client, "flashcards-dev-"));
-        context.register(Clock.class, Clock.systemUTC());
-        FlashcardService flashcardService = context.getBean(FlashcardService.class);
+        logger.log("After Dynamo");
+
+        pl.zimi.context.Context sailorContext = pl.zimi.context.Context.create();
+        sailorContext.register(FlashcardRepository.class, DynamoDbPort.port(FlashcardRepository.class, client, "flashcards-dev-"));
+        sailorContext.register(Clock.class, Clock.systemUTC());
+        FlashcardService flashcardService = sailorContext.getBean(FlashcardService.class);
 
         Server server = new ServerlessServer()
                 .setupService(flashcardService);
 
+        logger.log("Handle " + apiGatewayRequest, LogLevel.INFO);
         Request serverRequest = new Request(HttpMethod.valueOf(apiGatewayRequest.getHttpMethod()), apiGatewayRequest.getPath(), apiGatewayRequest.getBody());
         Response response = server.handleRequest(serverRequest);
+        logger.log("Processed " + apiGatewayRequest, LogLevel.INFO);
         ApiGatewayProxyResponse apiGatewayProxyResponse = new ApiGatewayProxyResponse();
         apiGatewayProxyResponse.setBody(response.body());
         apiGatewayProxyResponse.setStatusCode(200);
-        apiGatewayProxyResponse.setHeaders(new HashMap<>());
+        HashMap<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Origin", "https://cango.pl");
+        apiGatewayProxyResponse.setHeaders(headers);
         return apiGatewayProxyResponse;
     }
 

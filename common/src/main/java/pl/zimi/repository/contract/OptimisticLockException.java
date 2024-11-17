@@ -6,4 +6,8 @@ public class OptimisticLockException extends RuntimeException {
         super(message);
     }
 
+    public OptimisticLockException(final String message, final Exception exception) {
+        super(message, exception);
+    }
+
 }

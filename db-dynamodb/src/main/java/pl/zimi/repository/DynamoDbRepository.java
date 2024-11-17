@@ -60,11 +60,13 @@ public class DynamoDbRepository<T> implements Repository<T> {
         PutItemRequest.Builder builder = PutItemRequest.builder()
                 .tableName(tableName)
                 .item(itemValues);
-        if (!isNew) {
-            Map<String, AttributeValue> map = new HashMap<>();
-            map.put(":version", AttributeValue.builder().n(initVersion.toString()).build());
-            builder.conditionExpression("version = :version")
-                    .expressionAttributeValues(map);
+        if (contract.getVersion() != null) {
+            if (!isNew) {
+                Map<String, AttributeValue> map = new HashMap<>();
+                map.put(":version", AttributeValue.builder().n(initVersion.toString()).build());
+                builder.conditionExpression("version = :version")
+                        .expressionAttributeValues(map);
+            }
         }
         PutItemRequest request = builder.build();
 
@@ -72,7 +74,7 @@ public class DynamoDbRepository<T> implements Repository<T> {
             dynamoDbClient.putItem(request);
             return copy;
         } catch (ConditionalCheckFailedException e) {
-            throw new OptimisticLockException("");
+            throw new OptimisticLockException("", e);
         } catch (ResourceNotFoundException e) {
             throw new RuntimeException(e);
         } catch (DynamoDbException e) {

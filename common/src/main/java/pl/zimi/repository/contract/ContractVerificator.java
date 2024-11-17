@@ -263,7 +263,7 @@ public class ContractVerificator {
         Manipulator.set(foo1, descriptor, first);
         repository.save(foo1);
 
-        final List<T> list = repository.find(Queries.query(null, null, new LimitOffset(1L, null)));
+        final List<T> list = repository.find(Queries.query(null, null, LimitOffset.limit(1L)));
         assertEquals(1, list.size());
         assertTrue(Arrays.asList(first, second).contains(Manipulator.get(list.get(0), descriptor).getObject()));
     }
@@ -280,7 +280,7 @@ public class ContractVerificator {
         repository.save(foo1);
 
         var predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
-        final List<T> list = repository.find(Queries.query(predicate, Sorters.asc(descriptor), new LimitOffset(null, 1L)));
+        final List<T> list = repository.find(Queries.query(predicate, Sorters.asc(descriptor), LimitOffset.limitOffset(null, 1L)));
         assertEquals(1, list.size());
         assertEquals(second, Manipulator.get(list.get(0), descriptor).getObject());
     }
@@ -509,7 +509,7 @@ public class ContractVerificator {
     }
 
     static <T> void offsetFails(final Repository<T> repository) {
-        assertThrows(UnsupportedFeatureException.class, () -> repository.find(Queries.query(null, null, new LimitOffset(10L, 10L))));
+        assertThrows(UnsupportedFeatureException.class, () -> repository.find(Queries.query(null, null, LimitOffset.limitOffset(10L, 10L))));
     }
 
     static <T> void idContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {

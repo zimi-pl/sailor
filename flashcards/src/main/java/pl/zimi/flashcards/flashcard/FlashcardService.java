@@ -8,6 +8,7 @@ import pl.zimi.repository.query.*;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -20,20 +21,22 @@ public class FlashcardService {
     final Clock clock;
 
     public Optional<Question> next(UserId userId) {
+        System.out.println(LocalDateTime.now() + " next");
         final var userFilter = Filters.eq(SFlashcard.flashcard.userId.value, userId.getValue());
         final var useAfterFilter = Filters.lt(SFlashcard.flashcard.memorizationLevel.useAfter, clock.instant());
         final var useAfterIsNullFilter = Filters.isNull(SFlashcard.flashcard.memorizationLevel.useAfter);
         final var filter = Filters.and(userFilter, Filters.or(useAfterFilter, useAfterIsNullFilter));
 
-        final var query = Queries.query(filter, null, new LimitOffset(10L, 0L));
+        final var query = Queries.filter(filter);
         final var found = flashcardRepository.find(query);
         return found.stream()
-                .sorted(Comparator.comparingInt(flashcard -> flashcard.memorizationLevel.numberOfSuccesses))
+                .sorted(Comparator.comparingInt(flashcard -> flashcard.getMemorizationLevel().getNumberOfSuccesses()))
                 .findFirst()
                 .map(flashcard -> Question.builder().flashcardId(flashcard.getId()).original(flashcard.getOriginal()).translation(flashcard.getTranslation()).build());
     }
 
     public Flashcard add(AddFlashcardRequest request) {
+        System.out.println(LocalDateTime.now() + " add");
         final var flashcard = Flashcard.builder()
                 .userId(request.getUserId())
                 .original(request.getOriginal())
@@ -45,6 +48,7 @@ public class FlashcardService {
     }
 
     public AnswerResult answer(Answer answer) {
+        System.out.println(LocalDateTime.now() + " answer");
         final var memorizationStrategy = new ExpotentialMemorizationStrategy();
         final var flashcardOptional = flashcardRepository.findById(answer.getFlashcardId());
         if (flashcardOptional.isEmpty()) {
@@ -67,6 +71,7 @@ public class FlashcardService {
     }
 
     public List<Flashcard> listDeck(DeckId deckId) {
+        System.out.println(LocalDateTime.now() + " listDeck");
         Query query = Query.builder().filter(Filters.eq(SFlashcard.flashcard.deckId.value, deckId.getValue())).build();
         return flashcardRepository.find(query);
     }

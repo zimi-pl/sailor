@@ -1,9 +1,6 @@
 package pl.zimi.flashcards.flashcard;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NonNull;
+import lombok.*;
 import pl.zimi.flashcards.strategy.MemorizationStrategy;
 import pl.zimi.repository.annotation.Queryable;
 
@@ -13,6 +10,8 @@ import java.time.Instant;
 @EqualsAndHashCode
 @Queryable
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MemorizationLevel {
 
     Integer numberOfSuccesses;
