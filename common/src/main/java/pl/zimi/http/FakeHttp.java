@@ -1,7 +1,5 @@
 package pl.zimi.http;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import pl.zimi.client.HttpClient;
 import pl.zimi.client.Request;
 import pl.zimi.client.Response;
@@ -17,13 +15,29 @@ public class FakeHttp implements Server, HttpClient {
 
     private final Map<String, EndpointData> endpoints = new HashMap<>();
 
-    @AllArgsConstructor
-    @Getter
     static class EndpointData {
 
         private Endpoint endpoint;
         private List<String> variables;
         private String urlPattern;
+
+        public EndpointData(Endpoint endpoint, List<String> variables, String urlPattern) {
+            this.endpoint = endpoint;
+            this.variables = variables;
+            this.urlPattern = urlPattern;
+        }
+
+        public Endpoint getEndpoint() {
+            return endpoint;
+        }
+
+        public List<String> getVariables() {
+            return variables;
+        }
+
+        public String getUrlPattern() {
+            return urlPattern;
+        }
     }
 
     @Override

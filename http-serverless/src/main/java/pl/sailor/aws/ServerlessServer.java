@@ -1,7 +1,5 @@
 package pl.sailor.aws;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import pl.zimi.client.Request;
 import pl.zimi.client.Response;
 import pl.zimi.http.Endpoint;
@@ -19,13 +17,29 @@ public class ServerlessServer implements Server<Object> {
 
     private final Map<String, EndpointData> endpoints = new HashMap<>();
 
-    @AllArgsConstructor
-    @Getter
     static class EndpointData {
 
         private Endpoint endpoint;
         private List<String> variables;
         private String urlPattern;
+
+        public EndpointData(Endpoint endpoint, List<String> variables, String urlPattern) {
+            this.endpoint = endpoint;
+            this.variables = variables;
+            this.urlPattern = urlPattern;
+        }
+
+        public Endpoint getEndpoint() {
+            return endpoint;
+        }
+
+        public List<String> getVariables() {
+            return variables;
+        }
+
+        public String getUrlPattern() {
+            return urlPattern;
+        }
     }
 
     @Override

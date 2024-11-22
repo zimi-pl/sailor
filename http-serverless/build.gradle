@@ -18,7 +18,6 @@ repositories {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.11.0'
-    implementation 'org.projectlombok:lombok:1.18.20'
 
 //    implementation 'org.slf4j:slf4j-simple:2.0.10'
 
@@ -28,9 +27,6 @@ dependencies {
     annotationProcessor project(":annotation")
 
     implementation project(':common')
-
-    compileOnly 'org.projectlombok:lombok:1.18.20'
-    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

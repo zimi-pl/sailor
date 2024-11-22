@@ -6,8 +6,8 @@ import java.time.Instant;
 
 public class InitialData {
     public static void init(Repository<Student> studentRepository) {
-        studentRepository.save(Student.builder().id("1").firstName("John").lastName("Doe").dateOfBirth(Instant.parse("2000-01-01T15:00:00Z")).build());
-        studentRepository.save(Student.builder().id("2").firstName("Jane").lastName("Smith").dateOfBirth(Instant.parse("2003-01-01T15:00:00Z")).build());
-        studentRepository.save(Student.builder().id("2").firstName("Carol").lastName("Spider").dateOfBirth(Instant.parse("2010-01-01T15:00:00Z")).build());
+        studentRepository.save(new Student("1", "John", "Doe", Instant.parse("2000-01-01T15:00:00Z")));
+        studentRepository.save(new Student("2", "Jane", "Smith", Instant.parse("2003-01-01T15:00:00Z")));
+        studentRepository.save(new Student("2", "Carol", "Spider", Instant.parse("2010-01-01T15:00:00Z")));
     }
 }

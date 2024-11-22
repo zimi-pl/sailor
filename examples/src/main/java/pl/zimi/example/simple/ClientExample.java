@@ -40,10 +40,6 @@ public class ClientExample {
     private static DayInfo getDayInfo(String date) {
         LocalDate localDate = LocalDate.parse(date);
         DayOfWeek dayOfWeek = localDate.getDayOfWeek();
-        return DayInfo.builder()
-                .date(localDate)
-                .weekday(dayOfWeek.name())
-                .isWorkingDay(Arrays.asList(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(dayOfWeek))
-                .build();
+        return new DayInfo(localDate, dayOfWeek.name(), Arrays.asList(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY).contains(dayOfWeek));
     }
 }
