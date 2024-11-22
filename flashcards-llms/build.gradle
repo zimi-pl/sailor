@@ -28,8 +28,6 @@ dependencies {
     implementation project(':common')
     implementation project(':flashcards')
 
-    implementation project(':flashcards-llms')
-
     implementation 'software.amazon.awssdk:dynamodb:2.29.0'
     implementation project(':db-dynamodb')
     implementation project(':http-javalin')

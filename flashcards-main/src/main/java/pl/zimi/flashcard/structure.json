@@ -1,0 +1,7 @@
+{
+  "translation": "{{TRANSLATED_SENTENCE}}",
+  "phrases": [
+    {"original": "{{ORIGINAL_PHRASE}}", "translated": "{{TRANSLATED_PHRASE}}"},
+    ...
+  ]
+}

@@ -2,6 +2,8 @@ package pl.zimi.flashcards.deck;
 
 import lombok.RequiredArgsConstructor;
 import pl.zimi.flashcards.flashcard.*;
+import pl.zimi.flashcards.translator.PhraseTranslation;
+import pl.zimi.flashcards.translator.Translation;
 import pl.zimi.flashcards.translator.Translator;
 import pl.zimi.flashcards.user.UserId;
 
@@ -15,7 +17,7 @@ public class DeckService {
     private final Translator translator;
     private final FlashcardService flashcardService;
 
-    Deck createDeck(Content content, UserId userId) {
+    public Deck createDeck(Content content, UserId userId) {
         final var deck = Deck.builder()
                 .name(content.getTitle())
                 .build();
@@ -24,12 +26,12 @@ public class DeckService {
         final var sentences = contentDeckCreator.splitSentences(content);
         TreeSet<AddFlashcardRequest> requests = new TreeSet<>(Comparator.comparing(this::to));
         for (String sentence : sentences) {
-            List<Phrase> phrases = contentDeckCreator.splitPhrases(sentence);
-            for (Phrase phrase : phrases) {
-                Phrase translated = translator.translate(phrase);
+            Translation translated = translator.translate(sentence);
+//            List<Phrase> phrases = contentDeckCreator.splitPhrases(sentence);
+            for (PhraseTranslation translation : translated.getPhraseTranslations()) {
                 final var addFlashcardRequest = AddFlashcardRequest.builder()
-                        .original(phrase)
-                        .translation(translated)
+                        .original(new Phrase(translation.getOriginal(), translated.getOriginal()))
+                        .translation(new Phrase(translation.getTranslated(), translated.getTranslation()))
                         .userId(userId)
                         .deckId(saved.getId())
                         .build();
