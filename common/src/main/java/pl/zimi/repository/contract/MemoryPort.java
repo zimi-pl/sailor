@@ -5,6 +5,8 @@ import pl.zimi.repository.proxy.ContractException;
 import pl.zimi.repository.proxy.ProxyProvider;
 import pl.zimi.repository.query.Repository;
 
+import java.lang.reflect.Field;
+
 public class MemoryPort {
 
     public static <T> Repository<T> port(final Contract<T> contract) {
@@ -13,8 +15,8 @@ public class MemoryPort {
 
     public static <T> T port(final Class<T> repositoryClass) {
         try {
-            final var contractField = repositoryClass.getField("CONTRACT");
-            final var contract = (Contract)contractField.get(repositoryClass);
+            final Field contractField = repositoryClass.getField("CONTRACT");
+            final Contract contract = (Contract)contractField.get(repositoryClass);
             Repository repository = port(contract);
             return ProxyProvider.provide(repositoryClass, repository);
         } catch (Exception e) {

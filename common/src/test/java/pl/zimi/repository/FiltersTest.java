@@ -76,8 +76,8 @@ public class FiltersTest {
 
     @Test
     void ltInstantWithNull() {
-        final var dateString = "2024-07-07T07:31:52Z";
-        final var instant = Instant.parse(dateString);
+        final String dateString = "2024-07-07T07:31:52Z";
+        final Instant instant = Instant.parse(dateString);
         final Filter filter = Filters.lt(SFoo.foo.date, instant);
 
         final Foo foo = Foo.builder().abc(null).build();
@@ -87,8 +87,8 @@ public class FiltersTest {
 
     @Test
     void gtInstantWithNull() {
-        final var dateString = "2024-07-07T07:31:52Z";
-        final var instant = Instant.parse(dateString);
+        final String dateString = "2024-07-07T07:31:52Z";
+        final Instant instant = Instant.parse(dateString);
         final Filter filter = Filters.gt(SFoo.foo.date, instant);
 
         final Foo foo = Foo.builder().abc(null).build();

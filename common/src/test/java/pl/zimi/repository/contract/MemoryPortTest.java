@@ -11,7 +11,7 @@ class MemoryPortTest {
 
     @Test
     void shouldReturnPort() {
-        final var port = MemoryPort.port(FooRepository.class);
+        final FooRepository port = MemoryPort.port(FooRepository.class);
         assertNotNull(port);
     }
 

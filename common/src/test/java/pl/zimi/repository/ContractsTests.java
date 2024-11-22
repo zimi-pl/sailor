@@ -18,7 +18,7 @@ public class ContractsTests {
         final Contract<Foo> contract = Contract.repository(Foo.class)
                 .version(SFoo.foo.version);
 
-        final var contractForPort = Contract.repository(Foo.class);
+        final Contract<Foo> contractForPort = Contract.repository(Foo.class);
         final Function<Contract<Foo>, Repository<Foo>> differentSupplier = c -> MemoryPort.port(contractForPort);
         Assertions.assertThrows(RuntimeException.class, () -> ContractVerificator.assertThese(contract, differentSupplier));
     }
@@ -26,7 +26,7 @@ public class ContractsTests {
     @Test
     void testSubsetContract() {
         final Contract<Foo> contract = Contract.repository(Foo.class).sortingFeature(true).offsetFeature(true).regexFeature(true);
-        final var contractForPort = Contract.repository(Foo.class)
+        final Contract<Foo> contractForPort = Contract.repository(Foo.class)
                 .version(SFoo.foo.version)
                 .sortingFeature(true);
 

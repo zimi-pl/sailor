@@ -41,7 +41,7 @@ class ContextTest {
         context.register(Clock.class, Clock.systemUTC());
 
         // when
-        final var someClockBasedService = context.getBean(SomeClockBasedService.class);
+        final SomeClockBasedService someClockBasedService = context.getBean(SomeClockBasedService.class);
 
         // then
         assertNotNull(someClockBasedService);

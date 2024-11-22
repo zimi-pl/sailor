@@ -156,31 +156,31 @@ class ContractVerificatorTest {
 
     @Test
     void missingIdContract() {
-        final var contract = Contract.repository(Foo.class);
+        final Contract<Foo> contract = Contract.repository(Foo.class);
         ContractVerificator.missingIdContract(MemoryPort.port(contract), Foo.class);
     }
 
     @Test
     void findByIdFailsForMissingIdContract() {
-        final var contract = Contract.repository(Foo.class);
+        final Contract<Foo> contract = Contract.repository(Foo.class);
         ContractVerificator.findByIdFailsForMissingIdContract(MemoryPort.port(contract));
     }
 
     @Test
     void findByIdWorksForExistingIdContract() {
-        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
+        final Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id);
         ContractVerificator.findByIdWorksForExistingIdContract(MemoryPort.port(contract), Foo.class, SFoo.foo.id);
     }
 
     @Test
     void findByIdReturnsEmptyOptionalForExistingIdContract() {
-        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
+        final Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id);
         ContractVerificator.findByIdWorksForExistingIdContract(MemoryPort.port(contract), Foo.class, SFoo.foo.id);
     }
 
     @Test
     void existingIdContract() {
-        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id);
+        final Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id);
         ContractVerificator.existingIdContract(MemoryPort.port(contract), Foo.class);
     }
 }

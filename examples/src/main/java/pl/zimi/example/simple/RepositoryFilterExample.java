@@ -11,6 +11,7 @@ import pl.zimi.repository.query.Repository;
 import pl.zimi.repository.contract.MemoryPort;
 
 import java.time.Instant;
+import java.util.List;
 
 public class RepositoryFilterExample {
 
@@ -21,7 +22,7 @@ public class RepositoryFilterExample {
 
         Filter filter = Filters.eq(SStudent.student.firstName, "John");
 
-        final var students = studentRepository.find(Queries.filter(filter));
+        final List<Student> students = studentRepository.find(Queries.filter(filter));
 
         System.out.println(students);
     }

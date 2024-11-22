@@ -32,7 +32,7 @@ public class Manipulator {
         Object parent = source;
         Object child = source;
         try {
-            final var parts = descriptor.getPath().split("\\.");
+            final String[] parts = descriptor.getPath().split("\\.");
             for (int i = 0; i < parts.length; i++) {
                 final Field field = parent.getClass().getDeclaredField(parts[i]);
                 field.setAccessible(true);
@@ -78,7 +78,7 @@ public class Manipulator {
     }
 
     public static <T> TypedValue<T> getValue(final Object source, TypedDescriptor<T> descriptor) {
-        final var value = get(source, descriptor);
+        final Value value = get(source, descriptor);
         return new TypedValue<>((T)value.getObject(), value.getFailureReason());
     }
 

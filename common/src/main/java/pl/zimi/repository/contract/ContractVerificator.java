@@ -9,6 +9,7 @@ import pl.zimi.repository.query.*;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ContractVerificator {
@@ -20,12 +21,12 @@ public class ContractVerificator {
     }
 
     public static List<Test> test(final Contract<Foo> contract, final Function<Contract<Foo>, Repository<Foo>> supplier) {
-        final var idDescriptor = SFoo.foo.id;
-        final var distinctDescriptor = SFoo.foo.def;
-        final var stringDescriptor = SFoo.foo.def;
-        final var numberDescriptor = SFoo.foo.value;
-        final var compoundDescriptor = SFoo.foo.bar.str;
-        final var list = Arrays.asList(
+        final TypedDescriptor<String> idDescriptor = SFoo.foo.id;
+        final TypedDescriptor<String> distinctDescriptor = SFoo.foo.def;
+        final TypedDescriptor<String> stringDescriptor = SFoo.foo.def;
+        final TypedDescriptor<Integer> numberDescriptor = SFoo.foo.value;
+        final TypedDescriptor<String> compoundDescriptor = SFoo.foo.bar.str;
+        final List<Test> list = Arrays.asList(
                 new Test("saveAndRead", () -> saveAndRead(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
                 new Test("independenceAfterSave", () -> independenceAfterSave(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
                 new Test("independenceAfterFind", () -> independenceAfterFind(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor)),
@@ -45,7 +46,7 @@ public class ContractVerificator {
                 new Test("compoundObject", () -> compoundObject(supplier.apply(contract), contract.getEntityClass(), compoundDescriptor)),
                 new Test("compoundObjectNullHandling", () -> compoundObjectNullHandling(supplier.apply(contract), contract.getEntityClass(), distinctDescriptor, compoundDescriptor))
         );
-        final var tests = new ArrayList<>(list);
+        final List<Test> tests = new ArrayList<>(list);
 
         if (contract.getId() == null) {
             tests.add(new Test("missingIdContract", () -> missingIdContract(supplier.apply(contract), contract.getEntityClass())));
@@ -88,17 +89,17 @@ public class ContractVerificator {
 
     public static void delete(Repository<Foo> repository, Class<Foo> clazz, TypedDescriptor<String> distinctDescriptor) {
         //given
-        final var first = "001_delete";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_delete";
+        final Foo foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, distinctDescriptor, first);
-        final var saved = repository.save(foo);
+        final Foo saved = repository.save(foo);
 
         //when
         repository.delete(saved);
 
         //then
-        final var all = repository.find(Queries.all());
-        final var collect = all.stream().filter(f -> first.equals(Manipulator.get(f, distinctDescriptor).getObject())).collect(Collectors.toList());
+        final List<Foo> all = repository.find(Queries.all());
+        final List<Foo> collect = all.stream().filter(f -> first.equals(Manipulator.get(f, distinctDescriptor).getObject())).collect(Collectors.toList());
         assertEquals(0, collect.size());
     }
 
@@ -113,26 +114,26 @@ public class ContractVerificator {
     }
 
     public static <T> void saveAndRead(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
-        final var first = "001_saveAndRead";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_saveAndRead";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
 
         //change type to other
         repository.save(foo);
 
-        final var all = repository.find(Queries.all());
-        final var collect = all.stream().filter(f -> first.equals(Manipulator.get(f, descriptor).getObject())).collect(Collectors.toList());
+        final List<T> all = repository.find(Queries.all());
+        final List<T> collect = all.stream().filter(f -> first.equals(Manipulator.get(f, descriptor).getObject())).collect(Collectors.toList());
         assertEquals(1, collect.size());
         assertEquals(first, Manipulator.get(collect.get(0), descriptor).getObject());
     }
 
     public static <T> void independenceAfterSave(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
-        final var first = "001_independenceAfterSave";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_independenceAfterSave";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
-        final var second = "002_independenceAfterSave";
+        final String second = "002_independenceAfterSave";
         Manipulator.set(foo, descriptor, second);
 
         assertEquals(1, repository.find(Queries.filter(Filters.eq(descriptor, first))).size());
@@ -140,27 +141,27 @@ public class ContractVerificator {
     }
 
     static <T> void independenceAfterFind(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
-        final var first = "001_independenceAfterFind";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_independenceAfterFind";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
         final T fooFound = repository.find(Queries.filter(Filters.eq(descriptor, first))).get(0);
-        final var second = "002_independenceAfterFind";
+        final String second = "002_independenceAfterFind";
         Manipulator.set(fooFound, descriptor, second);
 
-        final var predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
+        final Filter predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
         assertEquals(first, Manipulator.get(repository.find(Queries.filter(predicate)).get(0), descriptor).getObject());
     }
 
     public static <T> void filterStringEqual(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor, final TypedDescriptor<String> id) {
-        final var first = "001_filterStringEqual";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_filterStringEqual";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
-        final var second = "002_filterStringEqual";
-        final var foo2 = Manipulator.noArgConstructor(clazz);
+        final String second = "002_filterStringEqual";
+        final T foo2 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo2, descriptor, second);
         repository.save(foo2);
 
@@ -172,31 +173,31 @@ public class ContractVerificator {
     }
 
     static <T> void filterStringRegex(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
-        final var first = "001_filterStringRegex";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_filterStringRegex";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
-        final var capitalS = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "S"));
+        final Filter capitalS = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "S"));
         assertEquals(1, repository.find(Queries.filter(capitalS)).size());
 
-        final var capitalB = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "B"));
+        final Filter capitalB = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "B"));
         assertEquals(0, repository.find(Queries.filter(capitalB)).size());
 
-        final var startsWith = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "^000"));
+        final Filter startsWith = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "^000"));
         assertEquals(0, repository.find(Queries.filter(startsWith)).size());
 
-        final var startsWithCorrect = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "^001"));
+        final Filter startsWithCorrect = Filters.and(Filters.eq(descriptor, first), Filters.regex(descriptor, "^001"));
         assertEquals(1, repository.find(Queries.filter(startsWithCorrect)).size());
     }
 
     static <T> void noFilter(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
-        final var first = "001_noFilter";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "001_noFilter";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
-        final var second = "002_noFilter";
+        final String second = "002_noFilter";
         final T foo2 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo2, descriptor, second);
         repository.save(foo2);
@@ -211,18 +212,18 @@ public class ContractVerificator {
     }
 
     static <T> void sort(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
-        final var first = "002_sort";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "002_sort";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
-        final var second = "001_sort";
-        final var foo2 = Manipulator.noArgConstructor(clazz);
+        final String second = "001_sort";
+        final T foo2 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo2, descriptor, second);
         repository.save(foo2);
 
         final List<T> list = repository.find(Queries.query(null, Sorters.asc(descriptor), null));
-        final var collected = list.stream()
+        final List<T> collected = list.stream()
                 .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
                 .collect(Collectors.toList());
         assertEquals(2, collected.size());
@@ -232,18 +233,18 @@ public class ContractVerificator {
     }
 
     static <T> void sortReversed(final Repository<T> repository, final Class<T> clazz, final TypedDescriptor<String> descriptor) {
-        final var first = "002_sortReversed";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String first = "002_sortReversed";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, first);
         repository.save(foo);
 
-        final var second = "001_sortReversed";
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final String second = "001_sortReversed";
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, descriptor, second);
         repository.save(foo1);
 
         final List<T> list = repository.find(Queries.query(null, Sorters.desc(descriptor), null));
-        final var collected = list.stream()
+        final List<T> collected = list.stream()
                 .filter(f -> Arrays.asList(first, second).contains(Manipulator.getValue(f, descriptor).getValue()))
                 .collect(Collectors.toList());
         assertEquals(2, collected.size());
@@ -253,13 +254,13 @@ public class ContractVerificator {
     }
 
     public static <T> void limit(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor, final Descriptor descriptor) {
-        final var second = "002_limit";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String second = "002_limit";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, second);
         repository.save(foo);
 
-        final var first = "001_limit";
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final String first = "001_limit";
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, descriptor, first);
         repository.save(foo1);
 
@@ -269,37 +270,37 @@ public class ContractVerificator {
     }
 
     static <T> void offset(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
-        final var second = "002_offset";
-        final var foo = Manipulator.noArgConstructor(clazz);
+        final String second = "002_offset";
+        final T foo = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo, descriptor, second);
         repository.save(foo);
 
-        final var first = "001_offset";
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final String first = "001_offset";
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, descriptor, first);
         repository.save(foo1);
 
-        var predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
+        Filter predicate = Filters.or(Filters.eq(descriptor, first), Filters.eq(descriptor, second));
         final List<T> list = repository.find(Queries.query(predicate, Sorters.asc(descriptor), LimitOffset.limitOffset(null, 1L)));
         assertEquals(1, list.size());
         assertEquals(second, Manipulator.get(list.get(0), descriptor).getObject());
     }
 
     static <T> void andPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor intDescriptor) {
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, intDescriptor, 5);
         repository.save(foo1);
 
-        final var foo2 = Manipulator.noArgConstructor(clazz);
+        final T foo2 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo2, intDescriptor, 10);
         repository.save(foo2);
 
-        final var foo3 = Manipulator.noArgConstructor(clazz);
+        final T foo3 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo3, intDescriptor, 7);
         repository.save(foo3);
 
-        final var gtPredicate = Filters.gt(intDescriptor, 5);
-        final var ltPredicate = Filters.lt(intDescriptor, 10);
+        final Filter gtPredicate = Filters.gt(intDescriptor, 5);
+        final Filter ltPredicate = Filters.lt(intDescriptor, 10);
         final Filter predicate = Filters.and(gtPredicate, ltPredicate);
         final List<T> foos = repository.find(Queries.filter(predicate));
 
@@ -308,13 +309,13 @@ public class ContractVerificator {
     }
 
     static <T> void orPredicate(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptor) {
-        final var first = "001_orPredicate";
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final String first = "001_orPredicate";
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, descriptor, first);
         repository.save(foo1);
 
-        final var second = "002_orPredicate";
-        final var foo2 = Manipulator.noArgConstructor(clazz);
+        final String second = "002_orPredicate";
+        final T foo2 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo2, descriptor, second);
         repository.save(foo2);
 
@@ -330,7 +331,7 @@ public class ContractVerificator {
     }
 
     public static <T> void lowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
-        final var lowerThan = "lowerThan";
+        final String lowerThan = "lowerThan";
         final T foo3 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo3, distinctDescriptor, lowerThan);
         Manipulator.set(foo3, intDescriptor, 7);
@@ -342,7 +343,7 @@ public class ContractVerificator {
         repository.save(foo);
 
         final Filter predicateLt = Filters.lt(intDescriptor, 10);
-        final var predicate = Filters.and(Filters.eq(distinctDescriptor, lowerThan), predicateLt);
+        final Filter predicate = Filters.and(Filters.eq(distinctDescriptor, lowerThan), predicateLt);
         final List<T> foos = repository.find(Queries.filter(predicate));
 
         assertEquals(1, foos.size());
@@ -351,8 +352,8 @@ public class ContractVerificator {
     }
 
     static <T> void greaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
-        final var greaterThan = "greaterThan";
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final String greaterThan = "greaterThan";
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, distinctDescriptor, greaterThan);
         Manipulator.set(foo1, intDescriptor, 7);
         repository.save(foo1);
@@ -363,7 +364,7 @@ public class ContractVerificator {
         repository.save(foo);
 
         final Filter predicateGt = Filters.gt(intDescriptor, 7);
-        final var predicate = Filters.and(Filters.eq(distinctDescriptor, greaterThan), Filters.gt(intDescriptor, 7));
+        final Filter predicate = Filters.and(Filters.eq(distinctDescriptor, greaterThan), Filters.gt(intDescriptor, 7));
 
         final List<T> foos = repository.find(Queries.filter(predicate));
 
@@ -373,7 +374,7 @@ public class ContractVerificator {
     }
 
     static <T> void isNull(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
-        final var foo1 = Manipulator.noArgConstructor(clazz);
+        final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, distinctDescriptor, "isNull_withoutNull");
         Manipulator.set(foo1, intDescriptor, 7);
         repository.save(foo1);
@@ -396,27 +397,27 @@ public class ContractVerificator {
     static <T> void compoundObject(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
         final Class internalClazz = Manipulator.type(clazz, internalDescriptor);
-        final var compoundObject = "compoundObject";
+        final String compoundObject = "compoundObject";
         final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, internalDescriptor, Manipulator.noArgConstructor(internalClazz));
         Manipulator.set(foo1, compoundDescriptor, compoundObject);
         repository.save(foo1);
 
         final Filter predicate = Filters.eq(compoundDescriptor, compoundObject);
-        final var foos = repository.find(Queries.filter(predicate));
+        final List<T> foos = repository.find(Queries.filter(predicate));
 
         assertEquals(1, foos.size());
         assertEquals("bar.str EQUAL compoundObject", predicate.describe());
     }
 
     public static <T> void compoundObjectNullHandling(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor compoundDescriptor) {
-        final var compoundObjectNullHandling = "compoundObjectNullHandling";
+        final String compoundObjectNullHandling = "compoundObjectNullHandling";
         final T foo1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(foo1, distinctDescriptor, "compoundObjectNullHandling");
         repository.save(foo1);
 
         final Filter predicate = Filters.and(Filters.eq(compoundDescriptor, compoundObjectNullHandling), Filters.eq(distinctDescriptor, compoundObjectNullHandling));
-        final var foos = repository.find(Queries.filter(predicate));
+        final List<T> foos = repository.find(Queries.filter(predicate));
 
         assertEquals(0, foos.size());
         assertEquals("(bar.str EQUAL compoundObjectNullHandling) AND (def EQUAL compoundObjectNullHandling)", predicate.describe());
@@ -424,12 +425,12 @@ public class ContractVerificator {
 
     static <T> void nullHandlingLowerThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final T foo3 = Manipulator.noArgConstructor(clazz);
-        final var distinct = "nullHandlingLowerThan";
+        final String distinct = "nullHandlingLowerThan";
         Manipulator.set(foo3, distinctDescriptor, distinct);
         repository.save(foo3);
 
         final Filter predicate = Filters.and(Filters.lt(intDescriptor, 5), Filters.eq(distinctDescriptor, distinct));
-        final var foos = repository.find(Queries.filter(predicate));
+        final List<T> foos = repository.find(Queries.filter(predicate));
 
         assertEquals(0, foos.size());
         assertEquals("(value LOWER_THAN 5) AND (def EQUAL nullHandlingLowerThan)", predicate.describe());
@@ -437,13 +438,13 @@ public class ContractVerificator {
 
     static <T> void nullHandlingGreaterThan(final Repository<T> repository, final Class<T> clazz, final Descriptor distinctDescriptor, final Descriptor intDescriptor) {
         final T foo3 = Manipulator.noArgConstructor(clazz);
-        final var distinct = "nullHandlingGreaterThan";
+        final String distinct = "nullHandlingGreaterThan";
         Manipulator.set(foo3, distinctDescriptor, distinct);
         repository.save(foo3);
 
-        final var predicateGt = Filters.gt(intDescriptor, 5);
-        final var predicate = Filters.and(Filters.eq(distinctDescriptor, distinct), predicateGt);
-        final var foos = repository.find(Queries.filter(predicate));
+        final Filter predicateGt = Filters.gt(intDescriptor, 5);
+        final Filter predicate = Filters.and(Filters.eq(distinctDescriptor, distinct), predicateGt);
+        final List<T> foos = repository.find(Queries.filter(predicate));
 
         assertEquals(0, foos.size());
         assertEquals("(def EQUAL nullHandlingGreaterThan) AND (value GREATER_THAN 5)", predicate.describe());
@@ -452,23 +453,23 @@ public class ContractVerificator {
     static <T> void sortingAscendingWithNull(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
         final Class internalClazz = Manipulator.type(clazz, internalDescriptor);
-        final var sortingAscendingWithNull = "sortingAscendingWithNull";
-        final var first = "001_sortingAscendingWithNull";
+        final String sortingAscendingWithNull = "sortingAscendingWithNull";
+        final String first = "001_sortingAscendingWithNull";
 
-        final var build1 = Manipulator.noArgConstructor(clazz);
+        final T build1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(build1, distinctDescriptor, sortingAscendingWithNull);
-        final var internal = Manipulator.noArgConstructor(internalClazz);
+        final Object internal = Manipulator.noArgConstructor(internalClazz);
         Manipulator.set(build1, internalDescriptor, internal);
         Manipulator.set(build1, compoundDescriptor, first);
         repository.save(build1);
 
-        final var build = Manipulator.noArgConstructor(clazz);
+        final T build = Manipulator.noArgConstructor(clazz);
         Manipulator.set(build, distinctDescriptor, sortingAscendingWithNull);
         repository.save(build);
 
-        final var comparator = new Sorter(compoundDescriptor, Direction.NATURAL);
-        final var predicate = Filters.eq(distinctDescriptor, sortingAscendingWithNull);
-        final var foos = repository.find(Queries.query(predicate, comparator, null));
+        final Sorter comparator = new Sorter(compoundDescriptor, Direction.NATURAL);
+        final Filter predicate = Filters.eq(distinctDescriptor, sortingAscendingWithNull);
+        final List<T> foos = repository.find(Queries.query(predicate, comparator, null));
         assertEquals(2, foos.size());
         assertEquals(null, Manipulator.get(foos.get(0), internalDescriptor).getObject());
         assertEquals(first, Manipulator.get(foos.get(1), compoundDescriptor).getObject());
@@ -478,22 +479,22 @@ public class ContractVerificator {
     static <T> void sortingDescendingWithNull(final Repository<T> repository, final Class<T> clazz, final Descriptor compoundDescriptor,final Descriptor distinctDescriptor) {
         final Descriptor internalDescriptor = compoundDescriptor.getParent();
         final Class internalClazz = Manipulator.type(clazz, internalDescriptor);
-        final var sortingDescendingWithNull = "sortingDescendingWithNull";
-        final var build = Manipulator.noArgConstructor(clazz);
+        final String sortingDescendingWithNull = "sortingDescendingWithNull";
+        final T build = Manipulator.noArgConstructor(clazz);
         Manipulator.set(build, distinctDescriptor, sortingDescendingWithNull);
         repository.save(build);
 
-        final var first = "001_sortingDescendingWithNull";
-        final var build1 = Manipulator.noArgConstructor(clazz);
+        final String first = "001_sortingDescendingWithNull";
+        final T build1 = Manipulator.noArgConstructor(clazz);
         Manipulator.set(build1, distinctDescriptor, sortingDescendingWithNull);
-        final var internal = Manipulator.noArgConstructor(internalClazz);
+        final Object internal = Manipulator.noArgConstructor(internalClazz);
         Manipulator.set(build1, internalDescriptor, internal);
         Manipulator.set(build1, compoundDescriptor, first);
         repository.save(build1);
 
-        final var comparator = new Sorter(compoundDescriptor, Direction.REVERSE);
-        final var predicate = Filters.eq(distinctDescriptor, sortingDescendingWithNull);
-        final var foos = repository.find(Queries.query(predicate, comparator, null));
+        final Sorter comparator = new Sorter(compoundDescriptor, Direction.REVERSE);
+        final Filter predicate = Filters.eq(distinctDescriptor, sortingDescendingWithNull);
+        final List<T> foos = repository.find(Queries.query(predicate, comparator, null));
         assertEquals(2, foos.size());
         assertEquals(first, Manipulator.get(foos.get(0), compoundDescriptor).getObject());
         assertEquals(null, Manipulator.get(foos.get(1), internalDescriptor).getObject());
@@ -513,32 +514,32 @@ public class ContractVerificator {
     }
 
     static <T> void idContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
         assertEquals(null, Manipulator.get(entity, idDescriptor).getObject());
-        final var saved = repository.save(entity);
+        final T saved = repository.save(entity);
         assertNotNull(Manipulator.get(saved, idDescriptor).getObject());
     }
 
     static <T> void idStringContractNextValue(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
         assertEquals(null, Manipulator.get(entity, idDescriptor).getObject());
-        final var first = repository.save(entity);
-        final var firstId = Manipulator.get(first, idDescriptor).getObject();
+        final T first = repository.save(entity);
+        final Object firstId = Manipulator.get(first, idDescriptor).getObject();
         assertNotNull(firstId);
 
-        final var second = repository.save(entity);
-        final var secondId = Manipulator.get(second, idDescriptor).getObject();
+        final T second = repository.save(entity);
+        final Object secondId = Manipulator.get(second, idDescriptor).getObject();
         assertNotNull(secondId);
         assertNotEquals(firstId, secondId);
     }
 
     static <T> void missingIdContract(final Repository<T> repository, final Class<T> clazz) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
 
         T saved = repository.save(entity);
         repository.save(saved);
 
-        final var result = repository.find(Queries.all());
+        final List<T> result = repository.find(Queries.all());
 
         assertEquals(2, result.size());
     }
@@ -548,61 +549,61 @@ public class ContractVerificator {
     }
 
     static <T> void findByIdWorksForExistingIdContract(final Repository<T> repository, final Class<T> clazz, final Descriptor idDescriptor) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
 
-        final var saved = repository.save(entity);
-        final var id = Manipulator.get(saved, idDescriptor).getObject();
+        final T saved = repository.save(entity);
+        final Object id = Manipulator.get(saved, idDescriptor).getObject();
 
-        final var retrieved = repository.findById(id).get();
+        final T retrieved = repository.findById(id).get();
         assertEquals(id, Manipulator.get(retrieved, idDescriptor).getObject());
     }
 
     static <T> void findByIdReturnsEmptyOptionalForExistingIdContract(final Repository<T> repository) {
-        final var retrieved = repository.findById("missing-id");
+        final Optional<T> retrieved = repository.findById("missing-id");
         assertEquals(Optional.empty(), retrieved);
     }
 
     static <T> void existingIdContract(final Repository<T> repository, final Class<T> clazz) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
 
         T saved = repository.save(entity);
         repository.save(saved);
 
-        final var result = repository.find(Queries.all());
+        final List<T> result = repository.find(Queries.all());
 
         assertEquals(1, result.size());
     }
 
     static <T> void versionContract(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorVersion) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
         assertEquals(null, Manipulator.get(entity, descriptorVersion).getObject());
-        final var saved = repository.save(entity);
+        final T saved = repository.save(entity);
         assertEquals(0, Manipulator.get(saved, descriptorVersion).getObject());
     }
 
     static <T> void versionContractNextValue(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorVersion) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
         assertEquals(null, Manipulator.get(entity, descriptorVersion).getObject());
-        final var saved = repository.save(entity);
+        final T saved = repository.save(entity);
         assertEquals(0, Manipulator.get(saved, descriptorVersion).getObject());
 
-        final var next = repository.save(saved);
+        final T next = repository.save(saved);
         assertEquals(1, Manipulator.get(next, descriptorVersion).getObject());
     }
 
     static <T> void versionContractOptimisticLock(final Repository<T> repository, final Class<T> clazz, final Descriptor descriptorId, final Descriptor descriptorVersion) {
-        final var entity = Manipulator.noArgConstructor(clazz);
+        final T entity = Manipulator.noArgConstructor(clazz);
         assertEquals(null, Manipulator.get(entity, descriptorVersion).getObject());
-        final var saved = repository.save(entity);
+        final T saved = repository.save(entity);
         assertEquals(0, Manipulator.get(saved, descriptorVersion).getObject());
 
-        final var next = repository.save(saved);
+        final T next = repository.save(saved);
         assertEquals(1, Manipulator.get(next, descriptorVersion).getObject());
 
         Manipulator.set(next, descriptorVersion, 0);
-        final var lock = assertThrows(OptimisticLockException.class, () -> repository.save(next));
-        final var id =  Manipulator.get(next, descriptorId).getObject();
-        final var fromDb = repository.find(Queries.filter(Filters.eq(descriptorId, id))).get(0);
+        final OptimisticLockException lock = assertThrows(OptimisticLockException.class, () -> repository.save(next));
+        final Object id =  Manipulator.get(next, descriptorId).getObject();
+        final T fromDb = repository.find(Queries.filter(Filters.eq(descriptorId, id))).get(0);
         assertEquals(1, Manipulator.get(fromDb, descriptorVersion).getObject());
     }
 

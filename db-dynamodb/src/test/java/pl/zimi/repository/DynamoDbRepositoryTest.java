@@ -23,7 +23,7 @@ public class DynamoDbRepositoryTest {
 
     @TestFactory
     List<DynamicTest> repositoryTest() {
-        final var contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version);
+        final Contract<Foo> contract = Contract.repository(Foo.class).id(SFoo.foo.id).version(SFoo.foo.version);
         DynamoDbClient client = DynamoDbClient.builder()
                 .region(Region.EU_CENTRAL_1)
                 .build();

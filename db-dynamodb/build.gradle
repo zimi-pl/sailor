@@ -3,6 +3,11 @@ plugins {
     id 'maven-publish'
 }
 
+java {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
+}
+
 group 'org.example'
 version '1.0-SNAPSHOT'
 
@@ -17,8 +22,6 @@ dependencies {
     implementation 'org.projectlombok:lombok:1.18.20'
 
 //    implementation 'org.slf4j:slf4j-simple:2.0.10'
-
-    testImplementation ('org.wiremock:wiremock:3.9.1')
 
     implementation project(":annotation")
     annotationProcessor project(":annotation")

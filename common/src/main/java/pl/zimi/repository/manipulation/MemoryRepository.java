@@ -6,10 +6,7 @@ import pl.zimi.repository.annotation.TypedDescriptor;
 import pl.zimi.repository.contract.Contract;
 import pl.zimi.repository.contract.OptimisticLockException;
 import pl.zimi.repository.contract.UnsupportedFeatureException;
-import pl.zimi.repository.query.Filters;
-import pl.zimi.repository.query.Queries;
-import pl.zimi.repository.query.Query;
-import pl.zimi.repository.query.Repository;
+import pl.zimi.repository.query.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +30,7 @@ public class MemoryRepository<T> implements Repository<T> {
     public T save(T entity) {
         final T copied = Manipulator.deepCopy(entity);
         if (contract.getId() != null && Manipulator.get(copied, contract.getId()).getObject() == null) {
-            final var newId = Integer.toString(idCounter.getAndIncrement());
+            final String newId = Integer.toString(idCounter.getAndIncrement());
             if (contract.getId() instanceof TypedDescriptor && !((TypedDescriptor)contract.getId()).getType().equals(String.class)) {
                 final Object id;
                 try {
@@ -49,11 +46,11 @@ public class MemoryRepository<T> implements Repository<T> {
                 Manipulator.set(copied, versionDescriptor, 0);
             }
         } else if (contract.getId() != null && versionDescriptor != null) {
-            final var previousVersion = Manipulator.get(entity, versionDescriptor).getObject();
-            final var id = Manipulator.get(entity, contract.getId()).getObject();
-            final var currentEntity = source.get(id);
+            final Object previousVersion = Manipulator.get(entity, versionDescriptor).getObject();
+            final Object id = Manipulator.get(entity, contract.getId()).getObject();
+            final T currentEntity = source.get(id);
             if (currentEntity != null) {
-                final var dbVersion = Manipulator.get(currentEntity, versionDescriptor).getObject();
+                final Object dbVersion = Manipulator.get(currentEntity, versionDescriptor).getObject();
                 if (Objects.equals(previousVersion, dbVersion)) {
                     Manipulator.set(copied, versionDescriptor, ((Integer) previousVersion) + 1);
                 } else {
@@ -63,7 +60,7 @@ public class MemoryRepository<T> implements Repository<T> {
                 throw new OptimisticLockException("Given version: " + previousVersion + ", db version: null");
             }
         }
-        final var id = contract.getId() != null ? Manipulator.get(copied, contract.getId()).getObject() : UUID.randomUUID().toString();
+        final Object id = contract.getId() != null ? Manipulator.get(copied, contract.getId()).getObject() : UUID.randomUUID().toString();
         source.put(id, copied);
         return Manipulator.deepCopy(copied);
     }
@@ -73,7 +70,7 @@ public class MemoryRepository<T> implements Repository<T> {
         if (contract.getId() == null) {
             throw new UnsupportedOperationException();
         }
-        final var list = find(Queries.filter(Filters.eq(contract.getId(), id)));
+        final List<T> list = find(Queries.filter(Filters.eq(contract.getId(), id)));
         if (list.isEmpty()) {
             return Optional.empty();
         } else {
@@ -83,12 +80,12 @@ public class MemoryRepository<T> implements Repository<T> {
 
     @Override
     public List<T> find(final Query query) {
-        final var filter = query.getFilter();
-        final var sort = query.getSorter();
+        final Filter filter = query.getFilter();
+        final Sorter sort = query.getSorter();
         if (sort != null && !contract.isSortingFeature()) {
             throw new UnsupportedFeatureException("Sorting");
         }
-        final var limit = query.getLimitOffset();
+        final LimitOffset limit = query.getLimitOffset();
         final Stream<T> streamed = source.values().stream();
         final Stream<T> filtered = filter != null ? streamed.filter(filter::test) : streamed;
         final Stream<T> sorted = sort != null ? filtered.sorted(sort::compare) : filtered;

@@ -20,7 +20,7 @@ public class ServerVerificator {
     }
 
     private static List<Test> test(final Supplier<Server> serverSupplier) {
-        final var list = Arrays.asList(
+        final List<Test> list = Arrays.asList(
                 new Test("getNoArg", () -> getNoArg(serverSupplier.get())),
                 new Test("getId", () -> getId(serverSupplier.get())),
                 new Test("getIdObject", () -> getIdObject(serverSupplier.get())),
@@ -29,7 +29,7 @@ public class ServerVerificator {
                 new Test("getIdInteger", () -> getIdInteger(serverSupplier.get())),
                 new Test("getIdIntegerInObject", () -> getIdIntegerInObject(serverSupplier.get()))
         );
-        final var tests = new ArrayList<>(list);
+        final List<Test> tests = new ArrayList<>(list);
 
 //        if (contract.getVersion() != null) {
 //            tests.add(new Test("versionContract", () -> versionContract(supplier.apply(contract), contract.getEntityClass(), contract.getVersion())));

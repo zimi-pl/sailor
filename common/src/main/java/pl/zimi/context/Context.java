@@ -1,5 +1,6 @@
 package pl.zimi.context;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,12 +19,12 @@ public class Context {
             return (T)beans.get(clazz);
         }
         try {
-            final var constructor = clazz.getConstructors()[0];
-            final var parameters = Arrays.stream(constructor.getParameterTypes())
+            final Constructor<?> constructor = clazz.getConstructors()[0];
+            final Object[] parameters = Arrays.stream(constructor.getParameterTypes())
                     .map(this::getBean)
                     .collect(Collectors.toList())
                     .toArray();
-            final var t = (T) constructor.newInstance(parameters);
+            final T t = (T) constructor.newInstance(parameters);
             beans.put(t.getClass(), t);
             return t;
         } catch (Exception e) {
