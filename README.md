@@ -2,12 +2,12 @@
 
 Sailor is a library which should help to write code in clean architecture fashion.
 Idea here is to create abstractions which developers use in their day to day work.
-In their code developers should base on this abstractions rather than external libraries to achieve their goals.
+Developers in their code should base on these abstractions rather than external libraries to achieve their goals.
 
 ## Getting started
 
 Everything you need to do is to add this library and then use one of abstractions instead of real implementations.
-Obviously code would be not usesable if there are only abstractions. So in sailor you will be able to use fake, in memory 
+Obviously code would be not usesable if there are only abstractions. So in Sailor you will be able to use fake, in memory 
 versions of those abstractions.
 
 ## Where the name Sailor came from?
@@ -17,7 +17,7 @@ This library should help you to easily go from one port to the other. That's why
 
 ## Why use Sailor?
 
-The goal of this library is not to replace other frameworks. It's rather to help you isolate your domain
+The goal of this library **is not to** replace other libraries/frameworks. It's rather to help you isolate your domain
 from implementations of your ports/adapters. Domain of your application should not know about DB, Message bus,
 dependency injection, servers and clients (and any other tools) you're using.
 
@@ -105,9 +105,24 @@ CalendarService calendarService = ServiceClientBuilder.client(CalendarService.cl
 
 This way we can easily call CalendarService from other microservice.
 
+## Where should I go from here?
+
+Currently this repository is splitted into several modules.
+Once it will be published in any maven repository only two of them will be required in your code.
+The other one will be optional or even not applicable.
+
+Let's see this structure:
+* annotation - it allows to generate some code for entities
+* common - core sailor
+* examples - hello world examples 
+* db-dynamodb, http-client-okhttp, http-javalin, http-serverless - implementation of abstraction correlated strictly with single lib
+* flashcards - this is not related project it can be perceived as more real world case (more than hello world)
+* flashcards-lambda, flashcards-local, flashcards-main - modules which integrates domain *flashcards* with used adapters allowing do deploy real thing
+
 ## Summary
 
-This library does not need to have more feature than any other you saw in your life.
-It's about creating abstraction and allow to test fairly complex application without having db, server, message bus or dependency injection framework.
+This library is not intended to have more features than any other you saw in your life.
+It's about creating abstractions and allow to test fairly complex application without having db, server, message bus or dependency injection framework.
 
-Hopefully in future it will allow write tests in a way where you can decide if it should be (sociable) unit, integration or even end-to-end test. 
+Hopefully in future it will allow write tests in a way where you can decide if it should be (sociable) unit, integration or even end-to-end test.
+It would be achieved by writing tests in a way which allow to switch dependencies easily.
